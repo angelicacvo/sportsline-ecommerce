@@ -6,14 +6,14 @@ export class Client {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column() 
   fullName: string;
 
   @Column()
   email: string;
 
   @Column()
-  phone: string;
+  phone: number;
 
   @OneToMany(() => Order, (order) => order.client)
   orders: Order[];
