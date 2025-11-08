@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: jeferson
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: sportsline
+    ports:
+      - "5777:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jeferson -d sportsline || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build: .
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: jeferson
+      DATABASE_PASSWORD: 12345
+      DATABASE_NAME: sportsline 
+    ports:
+      - "3000:3000"
+    command: ["pm2-runtime", "start", "dist/main.js"]
+
+volumes:
+  postgres_data:
