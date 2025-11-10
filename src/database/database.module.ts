@@ -21,9 +21,12 @@ import { DataSource } from 'typeorm';
                 database: config.get('DB_NAME'),
                 autoLoadEntities: true,
                 synchronize: true,
+                entities: [__dirname + '/../**/*.entity{.ts,.js}'],
                 ssl: {
                     rejectUnauthorized: false,
-                }
+                },
+                seeds: [__dirname + '/seeds/*{.ts,.js}'],
+                factories: [__dirname + '/factories/*{.ts,.js}'],
             }),
             inject: [ConfigService],
         }),
