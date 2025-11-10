@@ -24,11 +24,11 @@ export class CreateProductDto {
 	@IsPositive({ message: 'Price must be positive' })
 	price: number;
 
-  @IsNotEmpty({ message: 'Stock is required' })
-  @IsInt({ message: 'Stock must be an integer' })
-  stock: number;
+	@IsNotEmpty({ message: 'Stock is required' })
+	@IsInt({ message: 'Stock must be an integer' })
+	stock: number;
 
-  @IsOptional()
-  @IsInt({ message: 'userId must be an integer' })
-  userId?: number;
+	@IsOptional()
+	@IsInt({ message: 'userId must be an integer' })
+	userId?: number;
 }
