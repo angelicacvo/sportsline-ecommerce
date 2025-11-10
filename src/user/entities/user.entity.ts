@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, OneToMany } from "typeorm";
 import { Product } from "../../product/entities/product.entity";
 
-enum UserRole {
+export enum UserRole {
     ADMIN = 'admin',
     CUSTOMER = 'customer',
     SELLER = 'seller'

@@ -1,6 +1,9 @@
 import { IsInt, IsNotEmpty, IsNumber, IsOptional, IsPositive } from 'class-validator';
 
 export class CreateOrderItemDto {
+	@IsNotEmpty({ message: 'Order id is required' })
+	@IsInt({ message: 'orderId must be an integer' })
+	orderId: number;
 	@IsNotEmpty({ message: 'Product id is required' })
 	@IsInt({ message: 'productId must be an integer' })
 	productId: number;

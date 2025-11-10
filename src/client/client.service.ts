@@ -1,26 +1,74 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Client } from './entities/client.entity';
 
 @Injectable()
 export class ClientService {
-  create(createClientDto: CreateClientDto) {
-    return 'This action adds a new client';
+  constructor(
+    @InjectRepository(Client)
+    private clientRepository: Repository<Client>,
+  ) { }
+
+  async create(createClientDto: CreateClientDto) {
+    const existingClient = await this.clientRepository.findOne({
+      where: { email: createClientDto.email },
+    });
+
+    if (existingClient) {
+      throw new BadRequestException('Client with this email already exists');
+    }
+
+    const client = this.clientRepository.create(createClientDto);
+    return await this.clientRepository.save(client);
   }
 
-  findAll() {
-    return `This action returns all client`;
+
+  async findAll() {
+    return this.clientRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} client`;
+  async findOne(id: string): Promise<Client> {
+    const client = await this.clientRepository.findOne({
+      where: { id },
+    });
+
+    if (!client) {
+      throw new NotFoundException('Client not found');
+    }
+
+    return client;
   }
 
-  update(id: number, updateClientDto: UpdateClientDto) {
-    return `This action updates a #${id} client`;
+  async update(id: number, updateClientDto: UpdateClientDto): Promise<Client> {
+    const client = await this.clientRepository.findOne({ where: { id: id.toString() } });
+    if (!client) {
+      throw new NotFoundException('Client not found');
+    }
+
+    const existingClient = await this.clientRepository.findOne({
+      where: { email: updateClientDto.email },
+    });
+
+    if (existingClient && existingClient.id !== id.toString()) {
+      throw new BadRequestException('Client with this email already exists');
+    }
+
+    Object.assign(client, updateClientDto);
+    return this.clientRepository.save(client);
+
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} client`;
+  async remove(id: number): Promise<{message: string}> {
+    const client = await this.clientRepository.findOne({ where: { id: id.toString() } });
+    
+    if (!client) {
+      throw new NotFoundException('Client not found');
+    }
+
+    await this.clientRepository.remove(client);
+    return { message: 'Client removed successfully' };
   }
 }
