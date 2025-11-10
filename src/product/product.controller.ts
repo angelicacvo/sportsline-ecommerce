@@ -13,7 +13,7 @@ export class ProductController {
   }
 
   @Get()
-  findAll() {
+  findAll() { 
     return this.productService.findAll();
   }
 

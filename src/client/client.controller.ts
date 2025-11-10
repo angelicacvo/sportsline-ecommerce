@@ -13,7 +13,7 @@ export class ClientController {
   }
 
   @Get()
-  findAll() {
+  findAll() { 
     return this.clientService.findAll();
   }
 

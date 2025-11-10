@@ -23,6 +23,7 @@ export class ClientService {
 
     const client = this.clientRepository.create(createClientDto);
     return await this.clientRepository.save(client);
+    
   }
 
 

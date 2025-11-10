@@ -23,7 +23,7 @@ export class UserService {
     if (createUserDto.role) {
       const mapped = createUserDto.role as unknown as UserRole;
       user.role = mapped;
-    }
+    } 
     return this.userRepo.save(user);
   }
 
