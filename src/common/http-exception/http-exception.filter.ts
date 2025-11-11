@@ -7,30 +7,30 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
-// @Catch(HttpException) = "Atrapa todas las excepciones HTTP"
+// @Catch(HttpException) = "Catches all HTTP exceptions"
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
-  // Logger para registrar los errores en consola
+  // Logger to register errors in console
   private readonly logger = new Logger(HttpExceptionFilter.name);
 
-  // Este método se ejecuta cuando ocurre un error
+  // This method executes when an error occurs
   catch(exception: HttpException, host: ArgumentsHost) {
-    // 1. Obtener el contexto HTTP (request y response)
+    // 1. Get HTTP context (request and response)
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    // 2. Obtener información del error
+    // 2. Get error information
     const status = exception.getStatus(); // 400, 404, 500, etc.
-    const exceptionResponse = exception.getResponse(); // Mensaje del error
+    const exceptionResponse = exception.getResponse(); // Error message
 
-    // 3. Construir mensaje de error (puede ser string u objeto)
+    // 3. Build error message (can be string or object)
     const message =
       typeof exceptionResponse === 'string'
         ? exceptionResponse
         : (exceptionResponse as any).message || exception.message;
 
-    // 4. Crear respuesta personalizada
+    // 4. Create custom response
     const errorResponse = {
       statusCode: status,
       timestamp: new Date().toISOString(),
@@ -39,12 +39,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
       message: message,
     };
 
-    // 5. Registrar el error en consola
+    // 5. Log error in console
     this.logger.error(
       `${request.method} ${request.url} - Status: ${status} - Message: ${JSON.stringify(message)}`,
     );
 
-    // 6. Enviar respuesta al cliente
+    // 6. Send response to client
     response.status(status).json(errorResponse);
   }
 }
+
