@@ -15,6 +15,10 @@ export class User {
   @Column()
   password: string;
 
+  @Column({ default: 'user' })
+role: string;
+
+
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[];
 }
