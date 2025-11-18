@@ -16,8 +16,13 @@ export class User {
   password: string;
 
   @Column({ default: 'user' })
-role: string;
+  role: string;
+  
+@Column({ nullable: true })
+refreshToken: string;
 
+  @Column({ nullable: true })
+  hashedRefreshToken?: string;
 
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[];
