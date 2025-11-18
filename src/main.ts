@@ -25,15 +25,11 @@ async function bootstrap() {
 
   app.enableCors();
 
-  // ========================================
-  // SWAGGER CONFIGURATION
-  // ========================================
-  
-  // STEP 1: Create a configuration object with API metadata
+  // Create a configuration object with API metadata
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('Sportsline E-commerce API')           // API title shown at the top
+    .setTitle('Sportsline E-commerce API')           
     .setDescription('REST API for sports e-commerce platform with authentication, products, orders, and user management')  // API description
-    .setVersion('1.0')                               // API version
+    .setVersion('1.0')                              
     
     // Add JWT authentication scheme
     // This tells Swagger that routes can be protected with JWT Bearer tokens
@@ -78,7 +74,7 @@ async function bootstrap() {
     swaggerOptions: {
       persistAuthorization: true,  // Keep authorization token after page refresh
       docExpansion: 'none',         // Collapse all sections by default ('none', 'list', 'full')
-      filter: true,                 // Enable search/filter box
+      filter: true,                 // Enable search/filter boxs
       showRequestDuration: true,    // Show how long requests take
     },
   });
