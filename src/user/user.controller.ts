@@ -35,7 +35,7 @@ export class UserController {
   @Get()
   findAll() {
     return this.userService.findAll();
-  }
+  } 
 
   @ApiOperation({ summary: 'Get user by ID (Admin only)' })
   @ApiParam({ name: 'id', description: 'User ID', example: 1 })
