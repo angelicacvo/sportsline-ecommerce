@@ -15,7 +15,7 @@ export const ROLES_KEY = 'roles';
  * This decorator saves: { 'roles': ['admin', 'seller'] }
  * 
  * Later, RolesGuard reads this saved data using Reflector
- * 
+ *  
  * Example usage in controller:
  * @Roles(UserRole.ADMIN)                    ← Only admin can access
  * @Roles(UserRole.ADMIN, UserRole.SELLER)   ← Admin OR seller can access

@@ -5,7 +5,7 @@ export enum UserRole {
     ADMIN = 'admin',
     CUSTOMER = 'customer',
     SELLER = 'seller'
-}
+} 
 
 @Entity('users')
 export class User {
