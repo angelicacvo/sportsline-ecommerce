@@ -18,7 +18,7 @@ export class ProductService {
   async create(createProductDto: CreateProductDto) {
     let seller: User | null = null;
     if (createProductDto.userId) {
-      seller = await this.userRepo.findOne({ where: { id: createProductDto.userId.toString() } });
+      seller = await this.userRepo.findOne({ where: { id: createProductDto.userId } });
       if (!seller) throw new BadRequestException('User not found');
     }
     const product = this.productRepo.create({
@@ -35,17 +35,17 @@ export class ProductService {
   }
 
   async findOne(id: number) {
-    const product = await this.productRepo.findOne({ where: { id: id.toString() }, relations: ['seller'] });
+    const product = await this.productRepo.findOne({ where: { id }, relations: ['seller'] });
     if (!product) throw new NotFoundException('Product not found');
     return product;
   }
 
   async update(id: number, updateProductDto: UpdateProductDto) {
-    const product = await this.productRepo.findOne({ where: { id: id.toString() }, relations: ['seller'] });
+    const product = await this.productRepo.findOne({ where: { id }, relations: ['seller'] });
     if (!product) throw new NotFoundException('Product not found');
 
     if (updateProductDto['userId']) {
-      const seller = await this.userRepo.findOne({ where: { id: updateProductDto['userId'].toString() } });
+      const seller = await this.userRepo.findOne({ where: { id: updateProductDto['userId'] } });
       if (!seller) throw new BadRequestException('User not found');
       Object.assign(product, { seller });
     }
@@ -54,7 +54,7 @@ export class ProductService {
   }
 
   async remove(id: number) {
-    const product = await this.productRepo.findOne({ where: { id: id.toString() } });
+    const product = await this.productRepo.findOne({ where: { id } });
     if (!product) throw new NotFoundException('Product not found');
     await this.productRepo.remove(product);
     return { message: 'Product removed successfully' };

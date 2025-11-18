@@ -2,7 +2,7 @@ import { Body, Controller, HttpCode, HttpStatus, Get, Post, UseGuards, Request }
 import { AuthService } from './auth.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from './guards/auth.guard';
- 
+
 /**
  * @ApiTags() groups endpoints in Swagger UI
  * All endpoints in this controller will be grouped under "Authentication"
@@ -26,6 +26,11 @@ export class AuthController {
         schema: {
             type: 'object',
             properties: {
+                username: { 
+                    type: 'string', 
+                    example: 'johndoe',
+                    description: 'User\'s username'
+                },
                 email: { 
                     type: 'string', 
                     example: 'user@example.com',
@@ -43,7 +48,7 @@ export class AuthController {
                     description: 'User role (optional, defaults to customer)'
                 },
             },
-            required: ['email', 'password']
+            required: ['username', 'email', 'password']
         }
     })
     @ApiResponse({ 
@@ -62,9 +67,9 @@ export class AuthController {
     @ApiResponse({ status: 401, description: 'User already exists' })
     @HttpCode(HttpStatus.OK)
     @Post('register')
-    async registerUser(@Body() body: { email: string; password: string; role: string }): Promise<{ accessToken: string }> {
-        const { email, password, role } = body;
-        return this.authService.registerUser(email, password, role);
+    async registerUser(@Body() body: { username: string; email: string; password: string; role?: string }): Promise<{ accessToken: string }> {
+        const { username, email, password, role } = body;
+        return this.authService.registerUser(username, email, password, role);
     }
 
     @ApiOperation({ 

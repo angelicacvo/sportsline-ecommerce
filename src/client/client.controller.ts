@@ -29,7 +29,7 @@ export class ClientController {
   @Roles(UserRole.ADMIN)
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.clientService.findOne(id);
+    return this.clientService.findOne(+id);
   }
 
   @UseGuards(AuthGuard, RolesGuard)

@@ -9,13 +9,13 @@ export class AuthService {
     constructor(private userService: UserService,
         private jwtService: JwtService) { }
  
-    async registerUser(email: string, password: string, role: string): Promise<{ accessToken: string }> {
+    async registerUser(username: string, email: string, password: string, role?: string): Promise<{ accessToken: string }> {
         const existingUser = await this.userService.findByEmail(email);
         if (existingUser) {
             throw new UnauthorizedException('User already exists');
         }
 
-        const newUser = await this.userService.create({ email, password, role } as CreateUserDto);
+        const newUser = await this.userService.create({ username, email, password, role } as CreateUserDto);
         const payload = { sub: newUser.id, email: newUser.email, role: newUser.role };
         return {
             accessToken: await this.jwtService.signAsync(payload)

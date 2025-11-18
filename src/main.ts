@@ -68,7 +68,7 @@ async function bootstrap() {
 
   // STEP 3: Setup Swagger UI
   // SwaggerModule.setup(path, app, document) creates the UI at the specified path
-  // Access it at: http://localhost:3000/api/docs
+  // Access it at: http://localhost:3000/docs
   SwaggerModule.setup('docs', app, document, {
     // Swagger UI options
     swaggerOptions: {
@@ -82,6 +82,6 @@ async function bootstrap() {
   const port = config.get<number>('PORT') || 3000;
   await app.listen(port);
   console.log(`Application is running on: http://localhost:${port}`);
-  console.log(`Swagger documentation available at: http://localhost:${port}/api/docs`);
+  console.log(`Swagger documentation available at: http://localhost:${port}/docs`);
 }
 bootstrap();

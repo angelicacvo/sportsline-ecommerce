@@ -37,17 +37,17 @@ export class UserService {
   }
 
   async findOne(id: number) {
-    const user = await this.userRepo.findOne({ where: { id: id.toString() } });
+    const user = await this.userRepo.findOne({ where: { id } });
     if (!user) throw new NotFoundException('User not found');
     return user;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    const user = await this.userRepo.findOne({ where: { id: id.toString() } });
+    const user = await this.userRepo.findOne({ where: { id } });
     if (!user) throw new NotFoundException('User not found');
     if (updateUserDto['email']) {
       const existing = await this.userRepo.findOne({ where: { email: updateUserDto['email'] } });
-      if (existing && existing.id !== id.toString()) {
+      if (existing && existing.id !== id) {
         throw new BadRequestException('Email already in use');
       }
     }
@@ -60,7 +60,7 @@ export class UserService {
   }
 
   async remove(id: number) {
-    const user = await this.userRepo.findOne({ where: { id: id.toString() } });
+    const user = await this.userRepo.findOne({ where: { id } });
     if (!user) throw new NotFoundException('User not found');
     await this.userRepo.remove(user);
     return { message: 'User removed successfully' };
