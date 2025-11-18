@@ -4,6 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User, UserRole } from './entities/user.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -18,7 +19,7 @@ export class UserService {
     const user = this.userRepo.create({
       username: createUserDto.username,
       email: createUserDto.email,
-      password: createUserDto.password, // TODO: hash password
+      password: await bcrypt.hash(createUserDto.password, 10),
     });
     if (createUserDto.role) {
       const mapped = createUserDto.role as unknown as UserRole;
@@ -27,7 +28,11 @@ export class UserService {
     return this.userRepo.save(user);
   }
 
-  findAll() {
+  async findByEmail(email: string) {
+    return this.userRepo.findOne({ where: { email } });
+  }
+
+  async findAll() {
     return this.userRepo.find();
   }
 

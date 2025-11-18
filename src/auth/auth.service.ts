@@ -8,7 +8,7 @@ import { CreateUserDto } from 'src/user/dto/create-user.dto';
 export class AuthService {
     constructor(private userService: UserService,
         private jwtService: JwtService) { }
-
+ 
     async registerUser(email: string, password: string, role: string): Promise<{ accessToken: string }> {
         const existingUser = await this.userService.findByEmail(email);
         if (existingUser) {
