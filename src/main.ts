@@ -28,8 +28,7 @@ async function bootstrap() {
   // Create a configuration object with API metadata
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Sportsline E-commerce API')           
-    .setDescription('REST API for sports e-commerce platform with authentication, products, orders, and user management')  // API description
-    .setVersion('1.0')                              
+    .setDescription('REST API for sports e-commerce platform with authentication, products, orders, and user management')  // API description                              
     
     // Add JWT authentication scheme
     // This tells Swagger that routes can be protected with JWT Bearer tokens
@@ -53,12 +52,6 @@ async function bootstrap() {
     .addTag('Orders', 'Order processing and management')
     .addTag('Order Items', 'Individual items within orders')
     
-    // Add contact information (optional)
-    .setContact(
-      'Riwi Development Team',
-      'https://riwi.io',
-      'support@riwi.io'
-    )
     
     .build();  // Build the configuration object
 

@@ -59,7 +59,13 @@ export class AuthController {
             properties: {
                 accessToken: { 
                     type: 'string', 
-                    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+                    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+                    description: 'Token de acceso (válido 1 hora)'
+                },
+                refreshToken: { 
+                    type: 'string', 
+                    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+                    description: 'Token de renovación (válido 7 días)'
                 }
             }
         }
@@ -67,7 +73,7 @@ export class AuthController {
     @ApiResponse({ status: 401, description: 'User already exists' })
     @HttpCode(HttpStatus.OK)
     @Post('register')
-    async registerUser(@Body() body: { username: string; email: string; password: string; role?: string }): Promise<{ accessToken: string }> {
+    async registerUser(@Body() body: { username: string; email: string; password: string; role?: string }): Promise<{ accessToken: string; refreshToken: string }> {
         const { username, email, password, role } = body;
         return this.authService.registerUser(username, email, password, role);
     }
@@ -99,14 +105,21 @@ export class AuthController {
         schema: {
             type: 'object',
             properties: {
-                accessToken: { type: 'string' }
+                accessToken: { 
+                    type: 'string',
+                    description: 'Token de acceso (válido 1 hora)'
+                },
+                refreshToken: { 
+                    type: 'string',
+                    description: 'Token de renovación (válido 7 días)'
+                }
             }
         }
     })
     @ApiResponse({ status: 401, description: 'Invalid credentials' })
     @HttpCode(HttpStatus.OK)
     @Post('login')
-    async signIn(@Body() signInDto: Record<string, string>): Promise<{ accessToken: string }> {
+    async signIn(@Body() signInDto: Record<string, string>): Promise<{ accessToken: string; refreshToken: string }> {
         const { email, password } = signInDto;
         return this.authService.signIn(email, password);
     }
@@ -115,6 +128,44 @@ export class AuthController {
      * @ApiBearerAuth() indicates this endpoint requires JWT authentication
      * Adds a lock icon in Swagger UI
      */
+    @ApiOperation({ 
+        summary: 'Refresh access token',
+        description: 'Generates a new access token using a valid refresh token. Use this when your access token expires to avoid re-login.'
+    })
+    @ApiBody({
+        description: 'Refresh token',
+        schema: {
+            type: 'object',
+            properties: {
+                refreshToken: { 
+                    type: 'string', 
+                    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+                    description: 'El refresh token recibido en login/register'
+                }
+            },
+            required: ['refreshToken']
+        }
+    })
+    @ApiResponse({ 
+        status: 200, 
+        description: 'New access token generated',
+        schema: {
+            type: 'object',
+            properties: {
+                accessToken: { 
+                    type: 'string',
+                    description: 'Nuevo token de acceso (válido 1 hora)'
+                }
+            }
+        }
+    })
+    @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
+    @HttpCode(HttpStatus.OK)
+    @Post('refresh')
+    async refresh(@Body() body: { refreshToken: string }): Promise<{ accessToken: string }> {
+        return this.authService.refreshAccessToken(body.refreshToken);
+    }
+
     @ApiBearerAuth('JWT-auth')
     @ApiOperation({ 
         summary: 'Get current user profile',
