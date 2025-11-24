@@ -7,15 +7,17 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { RefreshStrategy } from './strategies/refresh.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/users/user.entity';
+import { UsersModule } from 'src/users/user.module'; // <-- IMPORTAR ESTO
 
 @Module({
   imports: [
     PassportModule,
     JwtModule.register({
-      secret: 'JWT_SECRET', 
+      secret: 'JWT_SECRET',
       signOptions: { expiresIn: '15m' },
     }),
     TypeOrmModule.forFeature([User]),
+    UsersModule, // <-- AGREGARLO AQUÍ!
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, RefreshStrategy],
