@@ -4,7 +4,6 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { UserRole } from 'src/user/entities/user.entity';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @Controller('product')
@@ -12,7 +11,7 @@ export class ProductController {
   constructor(private readonly productService: ProductService) { }
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SELLER)
+  @Roles('admin', 'seller')
   @Post()
   create(@Body() createProductDto: CreateProductDto) {
     return this.productService.create(createProductDto);
@@ -31,14 +30,14 @@ export class ProductController {
   }
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SELLER)
+  @Roles('admin', 'seller')
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
     return this.productService.update(+id, updateProductDto);
   }
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SELLER)
+  @Roles('admin', 'seller')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.productService.remove(+id);
