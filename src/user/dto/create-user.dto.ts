@@ -1,23 +1,16 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsIn, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-
-export enum UserRoleDto {
-	ADMIN = 'admin',
-	CUSTOMER = 'customer',
-	SELLER = 'seller',
-}
 
 /**
  * DTO for creating a new user
- * Uses class-validator for validation and Swagger decorators for documentation
+ * CAMBIO: Ya no usamos enum, usamos strings que se validan contra BD
  */
 export class CreateUserDto {
-	// @ApiProperty() tells Swagger about this field
 	@ApiProperty({
-		description: 'Username for the account',  // Field description
-		example: 'johndoe',                       // Example value shown in Swagger UI
-		minLength: 3,                             // Minimum length constraint
-		type: String,                             // Data type
+		description: 'Username for the account',
+		example: 'johndoe',
+		minLength: 3,
+		type: String,
 	})
 	@IsNotEmpty({ message: 'Username is required' })
 	@IsString({ message: 'Username must be a string' })
@@ -27,7 +20,7 @@ export class CreateUserDto {
 	@ApiProperty({
 		description: 'User email address',
 		example: 'john.doe@example.com',
-		format: 'email',  // Special format hint for Swagger
+		format: 'email',
 	})
 	@IsNotEmpty({ message: 'Email is required' })
 	@IsEmail({}, { message: 'Must be a valid email' })
@@ -37,7 +30,7 @@ export class CreateUserDto {
 		description: 'User password (will be hashed)',
 		example: 'SecurePass123!',
 		minLength: 6,
-		format: 'password',  // Hides input in Swagger UI
+		format: 'password',
 	})
 	@IsNotEmpty({ message: 'Password is required' })
 	@IsString({ message: 'Password must be a string' })
@@ -46,12 +39,12 @@ export class CreateUserDto {
 
 	@ApiProperty({ 
 		description: 'User role in the system',
-		enum: UserRoleDto,     // Shows dropdown with enum values
-		default: UserRoleDto.CUSTOMER,  // Default value
-		example: UserRoleDto.CUSTOMER,
-		required: false,       // Optional field
+		enum: ['admin', 'customer', 'seller'],
+		default: 'customer',
+		example: 'customer',
+		required: false,
 	})
 	@IsOptional()
-	@IsEnum(UserRoleDto, { message: 'Role must be admin, customer or seller' })
-	role?: UserRoleDto;
+	@IsIn(['admin', 'customer', 'seller'], { message: 'Role must be admin, customer or seller' })
+	role?: string;
 }

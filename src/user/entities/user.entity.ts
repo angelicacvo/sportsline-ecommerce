@@ -1,6 +1,11 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, OneToMany } from "typeorm";
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, OneToMany, ManyToOne } from "typeorm";
 import { Product } from "../../product/entities/product.entity";
+import { Role } from "../../role/entities/role.entity";
 
+/**
+ * ENUM DEPRECADO - Mantenido solo para compatibilidad temporal
+ * Los roles ahora vienen de la tabla 'roles'
+ */
 export enum UserRole {
     ADMIN = 'admin',
     CUSTOMER = 'customer',
@@ -21,12 +26,14 @@ export class User {
     @Column()
     password: string;
 
-    @Column({
-        type: 'enum',
-        enum: UserRole,
-        default: UserRole.CUSTOMER
-    })
-    role: UserRole;
+    /**
+     * RELACIÓN MANY TO ONE con Role
+     * - Un usuario tiene UN rol
+     * - Un rol puede estar en MUCHOS usuarios
+     * - eager: true → Carga automáticamente el rol (con permisos) al consultar user
+     */
+    @ManyToOne(() => Role, role => role.users, { eager: true })
+    role: Role;
     
     @CreateDateColumn()
     createdAt: Date;
