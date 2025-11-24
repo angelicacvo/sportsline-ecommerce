@@ -5,9 +5,13 @@ import { OrderItemsController } from './order-items.controller';
 import { OrderItem } from './entities/order-item.entity';
 import { Order } from '../order/entities/order.entity';
 import { Product } from '../product/entities/product.entity';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([OrderItem, Order, Product])],
+  imports: [
+    TypeOrmModule.forFeature([OrderItem, Order, Product]),
+    AuthModule,
+  ],
   controllers: [OrderItemsController],
   providers: [OrderItemsService],
 })
