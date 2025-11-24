@@ -1,51 +1,60 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
-import { UserRole } from '../../user/entities/user.entity';
 
 /**
- * RolesGuard - Verifies if the user has the required role to access a route
+ * RolesGuard - Verifica si el usuario tiene el rol necesario para acceder
  * 
- * How it works:
- * 1. Reads what roles are allowed (from @Roles decorator)
- * 2. Gets the user's role (from the request, set by AuthGuard)
- * 3. Compares: Does the user have one of the allowed roles?
- * 4. If yes → allow access, if no → block access (403)
+ * CAMBIO IMPORTANTE:
+ * ANTES: Comparábamos user.role (enum) con requiredRoles (enum) ❌
+ * AHORA: Comparamos user.role.name (string de BD) con requiredRoles (strings) ✅
+ * 
+ * CÓMO FUNCIONA:
+ * 1. Lee qué roles están permitidos (del decorador @Roles)
+ * 2. Obtiene el rol del usuario desde request.user.role (objeto Role de BD)
+ * 3. Compara: ¿El nombre del rol del usuario coincide con los permitidos?
+ * 4. Si sí → permite acceso, si no → bloquea (403)
  */
 @Injectable()
 export class RolesGuard implements CanActivate {
-  // Reflector: A tool to read metadata (information stored in decorators)
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    // STEP 1: Read which roles are allowed for this route
-    // Example: @Roles(UserRole.ADMIN, UserRole.SELLER) → requiredRoles = [UserRole.ADMIN, UserRole.SELLER]
-    const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(ROLES_KEY, [
-      context.getHandler(), // Check the method (e.g., adminOnly())
-      context.getClass(),   // Check the controller (e.g., @Controller)
+    // PASO 1: Leer qué roles están permitidos para esta ruta
+    // Ejemplo: @Roles('admin', 'seller') → requiredRoles = ['admin', 'seller']
+    const requiredRoles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
+      context.getHandler(),
+      context.getClass(),
     ]);
 
-    // STEP 2: If the route has no @Roles decorator, allow anyone (authenticated)
+    // PASO 2: Si la ruta no tiene @Roles, permitir acceso a cualquier autenticado
     if (!requiredRoles) {
       return true;
     }
 
-    // STEP 3: Get the logged-in user from the request
-    // AuthGuard already added user to request: req.user = { id, email, role }
+    // PASO 3: Obtener el usuario autenticado del request
+    // AuthGuard ya agregó el user: req.user = { sub: userId, email: userEmail, role: 'admin' }
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    // STEP 4: Check if user's role matches any of the required roles
-    // Example: user.role = UserRole.ADMIN, requiredRoles = [UserRole.ADMIN, UserRole.SELLER] → ✅ true
-    // Example: user.role = UserRole.CUSTOMER, requiredRoles = [UserRole.ADMIN] → ❌ false
-    const hasRole = requiredRoles.some((role) => user.role === role);
-
-    // STEP 5: If user doesn't have the required role, block access
-    if (!hasRole) {
-      throw new ForbiddenException(`Access denied. Required roles: ${requiredRoles.join(', ')}`);
+    // PASO 4: Verificar si el usuario tiene un rol
+    if (!user || !user.role) {
+      throw new ForbiddenException('User role not found');
     }
 
-    // ✅ User has the required role, allow access
+    // PASO 5: Comparar el rol del usuario con los roles permitidos
+    // user.role es un string: 'admin', 'seller', 'customer'
+    // Ejemplo: user.role = 'admin', requiredRoles = ['admin', 'seller'] → ✅ true
+    const hasRole = requiredRoles.includes(user.role);
+
+    // PASO 6: Si el usuario no tiene el rol requerido, bloquear acceso
+    if (!hasRole) {
+      throw new ForbiddenException(
+        `Access denied. Required roles: ${requiredRoles.join(', ')}. Your role: ${user.role}`
+      );
+    }
+
+    // ✅ Usuario tiene el rol requerido, permitir acceso
     return true;
   }
 } 
