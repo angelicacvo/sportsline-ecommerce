@@ -6,8 +6,10 @@ import { CreateUserDto } from 'src/user/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
-    constructor(private userService: UserService,
-        private jwtService: JwtService) { }
+    constructor(
+        private userService: UserService,
+        private jwtService: JwtService
+    ) { }
  
     async registerUser(username: string, email: string, password: string, role?: string): Promise<{ accessToken: string; refreshToken: string }> {
         const existingUser = await this.userService.findByEmail(email);
@@ -16,9 +18,18 @@ export class AuthService {
         }
 
         const newUser = await this.userService.create({ username, email, password, role } as CreateUserDto);
-        const payload = { sub: newUser.id, email: newUser.email, role: newUser.role };
-
+        
+        // Payload del JWT incluye el nombre del rol para facilitar validaciones
+        const payload = { 
+            sub: newUser.id, 
+            email: newUser.email, 
+            role: newUser.role.name  // ← Enviamos el nombre del rol ('admin', 'customer', etc)
+        };
+        
+        // AccessToken: 1 hora para uso normal
         const accessToken = await this.jwtService.signAsync(payload, { expiresIn: '1h' });
+        
+        // RefreshToken: 7 días para renovar el accessToken
         const refreshToken = await this.jwtService.signAsync(payload, { expiresIn: '7d' });
         
         return { accessToken, refreshToken };
@@ -35,7 +46,11 @@ export class AuthService {
             throw new UnauthorizedException('Invalid credentials');
         }
 
-        const payload = { sub: user.id, email: user.email, role: user.role };
+        const payload = { 
+            sub: user.id, 
+            email: user.email, 
+            role: user.role.name  // ← Enviamos el nombre del rol
+        };
 
         const accessToken = await this.jwtService.signAsync(payload, { expiresIn: '1h' });
         const refreshToken = await this.jwtService.signAsync(payload, { expiresIn: '7d' });
