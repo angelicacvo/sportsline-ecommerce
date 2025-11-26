@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/user.service';
 import * as bcrypt from 'bcrypt';
@@ -10,6 +14,9 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  // ---------------------------
+  // VALIDAR USUARIO
+  // ---------------------------
   async validateUser(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
 
@@ -26,54 +33,72 @@ export class AuthService {
     return user;
   }
 
+  // ---------------------------
+  // LOGIN
+  // ---------------------------
   async login(user: any) {
     const payload = { sub: user.id, email: user.email, role: user.role };
 
-    const accessToken = await this.jwtService.signAsync(payload, {
-      expiresIn: '15m',
-    });
-
-    const refreshToken = await this.jwtService.signAsync(payload, {
-      expiresIn: '7d',
-    });
-
     return {
       message: 'Login exitoso',
-      access_token: accessToken,
-      refresh_token: refreshToken,
+      access_token: await this.jwtService.signAsync(payload, {
+        expiresIn: '15m',
+      }),
+      refresh_token: await this.jwtService.signAsync(payload, {
+        expiresIn: '7d',
+      }),
       user,
     };
   }
 
+  // ---------------------------
+  // REFRESH TOKEN
+  // ---------------------------
   async refreshToken(user: any) {
     const payload = { sub: user.id, email: user.email, role: user.role };
 
-    const accessToken = await this.jwtService.signAsync(payload, {
-      expiresIn: '15m',
-    });
-
-    return { access_token: accessToken };
+    return {
+      access_token: await this.jwtService.signAsync(payload, {
+        expiresIn: '15m',
+      }),
+    };
   }
 
+  // ---------------------------
+  // REGISTRO
+  // ---------------------------
   async register(data: any) {
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const { email, password, name, role } = data;
 
+    // Verificar si el correo ya existe
+    const userExist = await this.usersService.findByEmail(email);
+    if (userExist) {
+      throw new BadRequestException('El usuario ya existe');
+    }
+
+    // Hash de contraseña
+    const hashedPass = await bcrypt.hash(password, 10);
+
+    // Crear usuario en BD
     const newUser = await this.usersService.create({
-      ...data,
-      password: hashedPassword,
+      email,
+      password: hashedPass,
+      name,
+      role: role ?? 'user', // por si no envía rol
     });
 
-    console.log("newUser recibido:", newUser);
+    // Garantizar estructura correcta
     const user = Array.isArray(newUser) ? newUser[0] : newUser;
 
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    console.log('Usuario creado:', user);
 
-    const token = await this.jwtService.signAsync(payload);
+    // Crear token después del registro
+    const payload = { sub: user.id, email: user.email, role: user.role };
 
     return {
       message: 'Usuario registrado correctamente',
       user,
-      access_token: token,
+      access_token: await this.jwtService.signAsync(payload),
     };
   }
 }

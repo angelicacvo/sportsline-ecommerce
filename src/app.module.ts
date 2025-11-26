@@ -13,17 +13,14 @@ import { Product } from './products/product.entity';
 import { Client } from './clients/client.entity';
 import { Order } from './orders/order.entity';
 
-import { FakeUserMiddleware } from './common/middleware/fake-user.middleware';
 
 @Module({
   imports: [
-    // Configuración global de variables de entorno
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
     }),
-
-    // Conexión a la base de datos
+    
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
@@ -35,8 +32,7 @@ import { FakeUserMiddleware } from './common/middleware/fake-user.middleware';
       synchronize: true,
     }),
 
-    // Módulos funcionales
-    AuthModule,      // <── AQUI ESTABA EL PROBLEMA
+    AuthModule, 
     UsersModule,
     ProductsModule,
     ClientsModule,
@@ -45,6 +41,6 @@ import { FakeUserMiddleware } from './common/middleware/fake-user.middleware';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(FakeUserMiddleware).forRoutes('*');
   }
 }
+
