@@ -1,7 +1,15 @@
-import { Controller, Post, Body, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Req,
+  UseGuards,
+  Get,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -15,14 +23,30 @@ export class AuthController {
     );
     return this.authService.login(user);
   }
-@Post('register')
-async register(@Body() body: any) {
-  return this.authService.register(body);
-}
+
+  @Post('register')
+  async register(@Body() body: any) {
+    return this.authService.register(body);
+  }
 
   @UseGuards(JwtAuthGuard)
   @Post('refresh')
   async refresh(@Req() req) {
     return this.authService.refreshToken(req.user);
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth() {
+    return;
+  }
+
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req) {
+    const user = req.user;
+
+    return this.authService.loginWithGoogle(user);
   }
 }

@@ -24,6 +24,11 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales incorrectas');
     }
 
+    // Si el usuario fue creado por OAuth puede que password sea null
+    if (!user.password) {
+      throw new UnauthorizedException('Credenciales incorrectas');
+    }
+
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
@@ -33,9 +38,6 @@ export class AuthService {
     return user;
   }
 
-  // ---------------------------
-  // LOGIN
-  // ---------------------------
   async login(user: any) {
     const payload = { sub: user.id, email: user.email, role: user.role };
 
@@ -49,6 +51,55 @@ export class AuthService {
       }),
       user,
     };
+  }
+
+  async validateGoogleUser(profile: any) {
+    const email = profile?.emails?.[0]?.value;
+    const name = profile?.displayName ?? profile?.name?.givenName ?? 'User';
+    const avatar = profile?.photos?.[0]?.value;
+    const providerId = profile?.id;
+
+    if (!email) {
+      throw new UnauthorizedException('Google profile no contiene email');
+    }
+
+    // Buscar usuario por email
+    let user = await this.usersService.findByEmail(email);
+
+    // Si no existe, crear usuario "google"
+    if (!user) {
+      user = await this.usersService.createGoogleUser({
+        email,
+        name,
+        avatar,
+        provider: 'google',
+        providerId,
+      });
+    } else {
+      // Si existe pero no tiene provider/provideId, podemos actualizarlo (opcional)
+      const needsUpdate =
+        user.provider !== 'google' || user.providerId !== providerId || !user.avatar;
+      if (needsUpdate) {
+        await this.usersService.update(user.id, {
+          provider: 'google',
+          providerId,
+          avatar,
+          name,
+        });
+        user = await this.usersService.findOne(user.id);
+      }
+    }
+
+    return user;
+  }
+
+  /**
+   * Genera los tokens usando el mismo flujo de login.
+   * Recibe el user (objeto) y delega a login()
+   */
+  async loginWithGoogle(user: any) {
+    // Aquí podrías añadir lógica adicional (registro de sesión, analytics, etc.)
+    return this.login(user);
   }
 
   // ---------------------------

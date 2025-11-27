@@ -7,7 +7,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { RefreshStrategy } from './strategies/refresh.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/users/user.entity';
-import { UsersModule } from 'src/users/user.module'; // <-- IMPORTAR ESTO
+import { UsersModule } from 'src/users/user.module'; 
+import { GoogleAuthModule } from './google/google.module';
 
 @Module({
   imports: [
@@ -17,8 +18,10 @@ import { UsersModule } from 'src/users/user.module'; // <-- IMPORTAR ESTO
       signOptions: { expiresIn: '15m' },
     }),
     TypeOrmModule.forFeature([User]),
-    UsersModule, // <-- AGREGARLO AQUÍ!
+    UsersModule, 
+    GoogleAuthModule,
   ],
+  
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, RefreshStrategy],
   exports: [AuthService],

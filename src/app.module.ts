@@ -7,7 +7,7 @@ import { ProductsModule } from './products/product.module';
 import { ClientsModule } from './clients/client.module';
 import { OrdersModule } from './orders/order.module';
 import { AuthModule } from './auth/auth.module';
-
+import { ApiKeyModule } from './api-key/api-key.module';
 import { User } from './users/user.entity';
 import { Product } from './products/product.entity';
 import { Client } from './clients/client.entity';
