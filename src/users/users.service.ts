@@ -11,7 +11,7 @@ export class UsersService {
 
   create(createUserDto: CreateUserDto) {
     const user = this.userRepository.create({
-      name: createUserDto.username,
+      name: createUserDto.name,
       email: createUserDto.email,
       password: createUserDto.password,
       role: createUserDto.role,
@@ -22,8 +22,28 @@ export class UsersService {
   findAll(){
     return this.userRepository.find();
   }
+  
   findOne(id: string) {
     return this.userRepository.findOne({ where: { id } });
+  }
+
+  findByEmail(email: string) {
+    return this.userRepository.findOne({
+      where: { email },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  }
+
+  findById(id: number) {
+    return this.userRepository.findOne({ where: { id: id.toString() } });
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {

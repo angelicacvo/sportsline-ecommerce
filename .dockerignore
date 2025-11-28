@@ -6,9 +6,6 @@ npm-debug.log
 .gitignore
 Dockerfile
 docker-compose.yml
-*.md
 coverage
 .idea
 .vscode
-*.test.ts
-*.spec.ts

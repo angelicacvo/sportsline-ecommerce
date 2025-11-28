@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { ConflictException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { CreateProductDto } from "./dto/createProduct.dto";
@@ -12,12 +12,19 @@ export class ProductsService {
     private productRepository: Repository<Product>,
   ) {}
 
-  create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto) {
     const product = this.productRepository.create({
       ...createProductDto,
-      category: { id: String(createProductDto.category_id) },
+      category: { id: String(createProductDto.categoryId) },
     });
-    return this.productRepository.save(product);
+    try {
+      return await this.productRepository.save(product);
+    } catch (error: any) {
+      if (error?.code === '23505') {
+        throw new ConflictException('Product title already exists');
+      }
+      throw error;
+    }
   }
 
   findAll() {

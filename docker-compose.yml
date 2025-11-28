@@ -4,19 +4,22 @@ services:
     restart: always
     environment:
       POSTGRES_USER: jeferson
-      POSTGRES_PASSWORD: 12345
+      POSTGRES_PASSWORD: JefersonKainToph
       POSTGRES_DB: sportsline
     ports:
-      - "5777:5432"
+      - "8326:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./seed.sql:/seed.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U jeferson -d sportsline || exit 1"]
       interval: 5s
       timeout: 3s
       retries: 20
+    networks:
+      - microservices-network
 
-  app:
+  gateway:
     build: .
     restart: always
     depends_on:
@@ -26,11 +29,112 @@ services:
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
       DATABASE_USER: jeferson
-      DATABASE_PASSWORD: 12345
-      DATABASE_NAME: sportsline 
+      DATABASE_PASSWORD: JefersonKainToph
+      DATABASE_NAME: sportsline
+      USERS_SERVICE_HOST: users-service
+      PRODUCTS_SERVICE_HOST: products-service
+      ORDERS_SERVICE_HOST: orders-service
+      CATEGORIES_SERVICE_HOST: categories-service
+      ORDER_ITEMS_SERVICE_HOST: order-items-service
     ports:
       - "3000:3000"
-    command: ["pm2-runtime", "start", "dist/main.js"]
+    command: node dist/src/gateway/main
+    networks:
+      - microservices-network
+
+  users-service:
+    build: .
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: jeferson
+      DATABASE_PASSWORD: JefersonKainToph
+      DATABASE_NAME: sportsline
+    ports:
+      - "4001:4001"
+    command: node dist/src/users/main
+    networks:
+      - microservices-network
+
+  products-service:
+    build: .
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: jeferson
+      DATABASE_PASSWORD: JefersonKainToph
+      DATABASE_NAME: sportsline
+    ports:
+      - "4002:4002"
+    command: node dist/src/products/main
+    networks:
+      - microservices-network
+
+  orders-service:
+    build: .
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: jeferson
+      DATABASE_PASSWORD: JefersonKainToph
+      DATABASE_NAME: sportsline
+    ports:
+      - "4003:4003"
+    command: node dist/src/orders/main
+    networks:
+      - microservices-network
+
+  categories-service:
+    build: .
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: jeferson
+      DATABASE_PASSWORD: JefersonKainToph
+      DATABASE_NAME: sportsline
+    ports:
+      - "4004:4004"
+    command: node dist/src/categories/main
+    networks:
+      - microservices-network
+
+  order-items-service:
+    build: .
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: jeferson
+      DATABASE_PASSWORD: JefersonKainToph
+      DATABASE_NAME: sportsline
+    ports:
+      - "4005:4005"
+    command: node dist/src/orderItems/main
+    networks:
+      - microservices-network
 
 volumes:
   postgres_data:
+
+networks:
+  microservices-network:
+    driver: bridge

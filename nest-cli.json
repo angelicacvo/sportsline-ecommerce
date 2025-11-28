@@ -2,7 +2,66 @@
 	"$schema": "https://json.schemastore.org/nest-cli",
 	"collection": "@nestjs/schematics",
 	"sourceRoot": "src",
+	"monorepo": true,
+	"root": "src",
 	"compilerOptions": {
-		"deleteOutDir": true
+		"webpack": true,
+		"tsConfigPath": "tsconfig.build.json"
+	},
+	"projects": {
+		"gateway": {
+			"type": "application",
+			"root": "src/gateway",
+			"entryFile": "main",
+			"sourceRoot": "src/gateway",
+			"compilerOptions": {
+				"tsConfigPath": "tsconfig.build.json"
+			}
+		},
+		"users-service": {
+			"type": "application",
+			"root": "src/users",
+			"entryFile": "main",
+			"sourceRoot": "src/users",
+			"compilerOptions": {
+				"tsConfigPath": "tsconfig.build.json"
+			}
+		},
+		"products-service": {
+			"type": "application",
+			"root": "src/products",
+			"entryFile": "main",
+			"sourceRoot": "src/products",
+			"compilerOptions": {
+				"tsConfigPath": "tsconfig.build.json"
+			}
+		},
+		"orders-service": {
+			"type": "application",
+			"root": "src/orders",
+			"entryFile": "main",
+			"sourceRoot": "src/orders",
+			"compilerOptions": {
+				"tsConfigPath": "tsconfig.build.json"
+			}
+		},
+		"categories-service": {
+			"type": "application",
+			"root": "src/categories",
+			"entryFile": "main",
+			"sourceRoot": "src/categories",
+			"compilerOptions": {
+				"tsConfigPath": "tsconfig.build.json"
+			}
+		},
+		"order-items-service": {
+			"type": "application",
+			"root": "src/orderItems",
+			"entryFile": "main",
+			"sourceRoot": "src/orderItems",
+			"compilerOptions": {
+				"tsConfigPath": "tsconfig.build.json"
+			}
+		}
 	}
 }
