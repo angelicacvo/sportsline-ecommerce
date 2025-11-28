@@ -1,6 +1,7 @@
 # 🚀 Implementación de Prácticas - Riwi SportsLine E-commerce
 
 ## 📋 Tabla de Contenidos
+
 - [Arquitectura del Proyecto](#arquitectura-del-proyecto)
 - [Semana 1: Fundamentos de NestJS](#semana-1-fundamentos-de-nestjs)
 - [Semana 2: TypeORM y Persistencia](#semana-2-typeorm-y-persistencia)
@@ -15,6 +16,7 @@
 ## 🏗️ Arquitectura del Proyecto
 
 ### Estructura de Microservicios
+
 ```
 sportsline-ecommerce/
 ├── src/
@@ -60,60 +62,36 @@ sportsline-ecommerce/
 
 ## ✅ Semana 1: Fundamentos de NestJS
 
-### Estado: ✅ COMPLETADO
+### Estado Actual: ✅ COMPLETADO
 
 #### 1. Setup del Proyecto
+
 **Ubicación:** `package.json`, `nest-cli.json`, `tsconfig.json`
 
-```json
-// package.json
-{
-  "name": "sportsline-ecommerce",
-  "version": "1.0.0",
-  "scripts": {
-    "build": "nest build && nest build users && ...",
-    "start:dev": "nest start --watch",
-    "start:docker": "docker-compose up -d"
-  }
-}
-```
+- Configuración de scripts build, start, docker
+- Estructura de monorepo con 6 aplicaciones
 
 #### 2. Configuración de Variables de Entorno
+
 **Ubicación:** `.env`, `src/gateway/main.ts`
 
-```typescript
-// Variables configuradas:
-- DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD, DB_NAME
-- JWT_SECRET, JWT_REFRESH_SECRET
-- JWT_EXPIRES_IN, JWT_REFRESH_EXPIRES_IN
-- Puertos de microservicios (4001-4005)
-```
+- Variables: DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD, DB_NAME
+- JWT_SECRET, JWT_REFRESH_SECRET, JWT_EXPIRES_IN, JWT_REFRESH_EXPIRES_IN
+- Puertos microservicios: 4001-4005
 
 #### 3. Integración TypeScript, ESLint, Prettier
-**Archivos:**
-- `tsconfig.json` - Configuración TypeScript estricta
-- `eslint.config.mjs` - Reglas de linting
-- `.prettierrc` - Formato de código
+
+- `tsconfig.json`: TypeScript estricto
+- `eslint.config.mjs`: Reglas de linting
+- `.prettierrc`: Formato de código
 
 #### 4. Conexión PostgreSQL con TypeORM
+
 **Ubicación:** `src/libs/database/database.module.ts`
 
-```typescript
-@Module({
-  imports: [
-    TypeOrmModule.forRootAsync({
-      useFactory: () => ({
-        type: 'postgres',
-        host: process.env.DB_HOST,
-        // ... configuración completa
-      }),
-    }),
-  ],
-})
-export class DatabaseModule {}
-```
-
-**✅ Validación:** Servidor arranca en puerto 3000 (Gateway) y microservicios en 4001-4005
+- Módulo compartido con TypeOrmModule.forRootAsync
+- Configuración desde variables de entorno
+- **✅ Validación:** Gateway en puerto 3000, microservicios 4001-4005
 
 ---
 
@@ -122,68 +100,17 @@ export class DatabaseModule {}
 ### Estado: ✅ COMPLETADO
 
 #### 1. Entidades con TypeORM
+
 **Ubicación:** `src/*/entities/*.entity.ts`
 
-**User Entity:**
-```typescript
-@Entity('users')
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Column()
-  name: string;
-
-  @Column({ unique: true })
-  email: string;
-
-  @Column()
-  password: string;
-
-  @Column({ default: 'user' })
-  role: string;
-}
-```
-
-**Product Entity:**
-```typescript
-@Entity('products')
-export class Product {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Column()
-  name: string;
-
-  @Column('decimal', { precision: 10, scale: 2 })
-  price: number;
-
-  @ManyToOne(() => Category)
-  @JoinColumn({ name: 'categoryId' })
-  category: Category;
-}
-```
-
-**Order Entity:**
-```typescript
-@Entity('orders')
-export class Order {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'userId' })
-  user: User;
-
-  @OneToMany(() => OrderItem, orderItem => orderItem.order)
-  orderItems: OrderItem[];
-
-  @Column('decimal', { precision: 10, scale: 2 })
-  total: number;
-}
-```
+- **User:** id (UUID), name, email (unique), password, role
+- **Product:** id, title (unique), description, stock, value, categoryId (FK), timestamps
+- **Order:** id, userId (FK), total, timestamps
+- **OrderItem:** id, orderId (FK), productId (FK), quantity, price
+- **Category:** id, name, description
 
 #### 2. Relaciones Implementadas
+
 - `User` 1:N `Order` (OneToMany)
 - `Order` 1:N `OrderItem` (OneToMany)
 - `Product` N:1 `Category` (ManyToOne)
@@ -191,46 +118,21 @@ export class Order {
 - `OrderItem` N:1 `Order` (ManyToOne)
 
 #### 3. Seeders
-**Ubicación:** `src/libs/seeder/seed.ts`
 
-```typescript
-// Orden de población:
-1. Categories (5 categorías deportivas)
-2. Products (10 productos con categorías)
-3. Users (3 usuarios: admin + 2 users)
-4. Orders (2 órdenes)
-5. OrderItems (3 items por orden)
-```
+**Ubicación:** `seed.sql`
 
-**Ejecutar seeders:**
-```bash
-npm run seed
-```
+- Categories: 3 categorías deportivas
+- Products: 3 productos con FK a categorías
+- Users: 2 usuarios (<admin@sportsline.com>/admin123, <user@sportsline.com>/user123) con bcrypt
+- **Ejecutar:** `npm run seed` (ejecuta `seed.sql` en Postgres via Docker)
 
 #### 4. Repositorios y CRUD
+
 **Ubicación:** `src/*/services/*.service.ts`
 
-```typescript
-@Injectable()
-export class UsersService {
-  constructor(
-    @InjectRepository(User) 
-    private userRepository: Repository<User>
-  ) {}
-
-  create(dto: CreateUserDto) {
-    return this.userRepository.save(dto);
-  }
-
-  findAll() {
-    return this.userRepository.find();
-  }
-  
-  findByEmail(email: string) {
-    return this.userRepository.findOne({ where: { email } });
-  }
-}
-```
+- Inyección de `Repository<Entity>` con `@InjectRepository`
+- Métodos: create, findAll, findOne, findById, findByEmail, update, remove
+- Uso de TypeORM query builder y métodos del repositorio
 
 ---
 
@@ -239,148 +141,54 @@ export class UsersService {
 ### Estado: ✅ COMPLETADO
 
 #### 1. Módulos Generados
+
 **Estructura de cada microservicio:**
-```
-src/users/
-├── dto/
-│   ├── createUser.dto.ts
-│   └── updateUser.dto.ts
-├── entities/
-│   └── user.entity.ts
-├── users.controller.ts
-├── users.message.controller.ts  # TCP MessagePattern
-├── users.service.ts
-├── users.module.ts
-└── main.ts
-```
+
+- `dto/`: CreateDto, UpdateDto con validaciones
+- `entities/`: Entidad TypeORM
+- `controller.ts`: Endpoints HTTP (solo gateway)
+- `message.controller.ts`: MessagePattern TCP para RPC
+- `service.ts`: Lógica de negocio y acceso a BD
+- `module.ts`: Importa TypeORM, providers, exports
+- `main.ts`: Bootstrap del microservicio TCP
 
 #### 2. DTOs con Validación
-**Ubicación:** `src/gateway/auth/dto/*.dto.ts`
 
-**LoginDto:**
-```typescript
-export class LoginDto {
-  @ApiProperty({ example: 'user@example.com' })
-  @IsEmail()
-  @IsNotEmpty()
-  email: string;
+**Ubicación:** `src/gateway/auth/dto/*.dto.ts`, `src/*/dto/*.dto.ts`
 
-  @ApiProperty({ minLength: 6 })
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(6)
-  password: string;
-}
-```
-
-**RegisterDto:**
-```typescript
-export class RegisterDto {
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  name: string;
-
-  @ApiProperty()
-  @IsEmail()
-  @IsNotEmpty()
-  email: string;
-
-  @ApiProperty({ minLength: 6 })
-  @IsString()
-  @MinLength(6)
-  password: string;
-
-  @ApiProperty({ default: 'user', required: false })
-  @IsString()
-  @IsOptional()
-  role?: string;
-}
-```
+- Decoradores: `@IsEmail`, `@IsString`, `@IsNotEmpty`, `@MinLength`, `@IsOptional`, `@IsInt`, `@Min`
+- Swagger: `@ApiProperty`, `@ApiPropertyOptional` con ejemplos
+- LoginDto: email, password (min 6 chars)
+- RegisterDto: name, email, password, role (optional)
+- CreateProductDto: title, description, stock, value, categoryId
+- UpdateDto usando `@nestjs/mapped-types` PartialType
 
 #### 3. ConfigModule y Variables de Entorno
-**Validación automática en main.ts:**
-```typescript
-app.useGlobalPipes(
-  new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-  }),
-);
-```
+
+**Validación automática:**
+
+- ValidationPipe global con whitelist, forbidNonWhitelisted, transform
+- Variables desde `.env`: JWT_SECRET, DB_*, puertos microservicios
+- Acceso via `process.env.VARIABLE_NAME`
 
 #### 4. Inyección de Dependencias
-**Comunicación Gateway → Microservicios:**
-```typescript
-@Injectable()
-export class AuthService {
-  constructor(
-    private jwtService: JwtService,
-    @Inject('USERS_SERVICE') private usersClient: ClientProxy,
-  ) {}
 
-  async login(loginDto: LoginDto) {
-    const user = await firstValueFrom(
-      this.usersClient.send({ cmd: 'find_user_by_email' }, loginDto.email)
-    );
-    // ...
-  }
-}
-```
+**Comunicación Gateway → Microservicios:**
+
+- `@Inject('SERVICE_NAME')` con `ClientProxy` de NestJS Microservices
+- `firstValueFrom()` para convertir Observables a Promises
+- Patrón RPC: `client.send({ cmd: 'command_name' }, payload)`
+- ClientsModule.register con configuración TCP (host, port)
 
 #### 5. Pruebas Unitarias
+
 **Ubicación:** `test/unit/*/`
 
-**Configuración:** `jest.config.js`
-```javascript
-module.exports = {
-  rootDir: '.',
-  testRegex: 'test/unit/.*\\.spec\\.ts$',
-  coverageDirectory: './coverage',
-  collectCoverageFrom: [
-    'src/**/*.ts',
-    '!src/**/main.ts',
-    '!src/**/seeder/**'
-  ]
-};
-```
-
-**Ejemplo de test:**
-```typescript
-describe('UsersService', () => {
-  let service: UsersService;
-  let repository: Repository<User>;
-
-  beforeEach(async () => {
-    const module = await Test.createTestingModule({
-      providers: [
-        UsersService,
-        {
-          provide: getRepositoryToken(User),
-          useValue: {
-            create: jest.fn(),
-            save: jest.fn(),
-            find: jest.fn(),
-          },
-        },
-      ],
-    }).compile();
-
-    service = module.get<UsersService>(UsersService);
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-});
-```
-
-**Ejecutar tests:**
-```bash
-npm test              # Todos los tests
-npm run test:cov      # Con cobertura
-```
+- Configuración: `jest.config.js` con rootDir, testRegex, cobertura
+- Tests organizados por servicio: users, products, orders, categories, orderItems
+- Mock de repositorios con `getRepositoryToken(Entity)`
+- `Test.createTestingModule` para crear contexto de prueba
+- **Ejecutar:** `npm test`, `npm run test:cov` (cobertura actual ~21%)
 
 ---
 
@@ -389,217 +197,40 @@ npm run test:cov      # Con cobertura
 ### Estado: ✅ COMPLETADO
 
 #### 1. Middleware de Logging
+
 **Ubicación:** `src/gateway/middleware/logger.middleware.ts`
 
-```typescript
-@Injectable()
-export class LoggerMiddleware implements NestMiddleware {
-  private readonly logger = new Logger('HTTP');
-
-  use(req: Request, res: Response, next: NextFunction) {
-    const { method, originalUrl } = req;
-    const startTime = Date.now();
-
-    res.on('finish', () => {
-      const { statusCode } = res;
-      const responseTime = Date.now() - startTime;
-      const contentLength = res.get('content-length') || 0;
-      
-      this.logger.log(
-        `${method} ${originalUrl} ${statusCode} ${responseTime}ms - ${contentLength} bytes`
-      );
-    });
-
-    next();
-  }
-}
-```
-
-**Aplicado en:** `src/gateway/main.ts`
-```typescript
-app.use((req, res, next) => {
-  const middleware = new LoggerMiddleware();
-  middleware.use(req, res, next);
-});
-```
+- Implementa `NestMiddleware`
+- Logger para método, URL, statusCode, tiempo de respuesta, tamaño
+- Listener en evento `finish` de respuesta
+- **Aplicado:** Globalmente en `main.ts` del gateway
 
 #### 2. Exception Filters
+
 **Ubicación:** `src/gateway/filters/`
 
-**HttpExceptionFilter:**
-```typescript
-@Catch(HttpException)
-export class HttpExceptionFilter implements ExceptionFilter {
-  catch(exception: HttpException, host: ArgumentsHost) {
-    const ctx = host.switchToHttp();
-    const response = ctx.getResponse();
-    const request = ctx.getRequest();
-    const status = exception.getStatus();
-
-    response.status(status).json({
-      success: false,
-      statusCode: status,
-      timestamp: new Date().toISOString(),
-      path: request.url,
-      method: request.method,
-      message: exception.message,
-      error: exception.name,
-    });
-  }
-}
-```
-
-**RpcExceptionFilter:**
-```typescript
-@Catch(RpcException)
-export class RpcExceptionFilter implements ExceptionFilter {
-  catch(exception: RpcException, host: ArgumentsHost) {
-    const ctx = host.switchToHttp();
-    const response = ctx.getResponse();
-    const error: any = exception.getError();
-    
-    const statusCode = error.statusCode || 500;
-    const message = error.message || 'Internal server error';
-
-    response.status(statusCode).json({
-      success: false,
-      statusCode,
-      message,
-      timestamp: new Date().toISOString(),
-    });
-  }
-}
-```
-
-**Aplicación global:** `src/gateway/gateway.module.ts`
-```typescript
-providers: [
-  {
-    provide: APP_FILTER,
-    useClass: HttpExceptionFilter,
-  },
-  {
-    provide: APP_FILTER,
-    useClass: RpcExceptionFilter,
-  },
-]
-```
+- **HttpExceptionFilter:** Maneja `HttpException`, devuelve JSON con success, statusCode, timestamp, path, method, message
+- **RpcExceptionFilter:** Maneja `RpcException` de microservicios, mapea errores RPC a HTTP
+- Manejo especial para errores de BD: `QueryFailedError` con código `23505` (unique constraint) → 409 Conflict
+- **Aplicación:** Global via `APP_FILTER` provider en `gateway.module.ts`
 
 #### 3. Guards Personalizados
+
 **Ubicación:** `src/gateway/guards/`
 
-**JwtAuthGuard:**
-```typescript
-@Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt') {
-  constructor(private reflector: Reflector) {
-    super();
-  }
-
-  canActivate(context: ExecutionContext) {
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-
-    if (isPublic) {
-      return true;
-    }
-
-    return super.canActivate(context);
-  }
-}
-```
-
-**RolesGuard:**
-```typescript
-@Injectable()
-export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
-
-  canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<string[]>(
-      ROLES_KEY,
-      [context.getHandler(), context.getClass()],
-    );
-
-    if (!requiredRoles) {
-      return true;
-    }
-
-    const { user } = context.switchToHttp().getRequest();
-    return requiredRoles.some((role) => user?.role === role);
-  }
-}
-```
-
-**Aplicación global:**
-```typescript
-providers: [
-  {
-    provide: APP_GUARD,
-    useClass: JwtAuthGuard,  // Protege todas las rutas por defecto
-  },
-  {
-    provide: APP_GUARD,
-    useClass: RolesGuard,    // Valida roles cuando @Roles() está presente
-  },
-]
-```
+- **JwtAuthGuard:** Extiende `AuthGuard('jwt')`, permite rutas públicas con `@Public()`, valida token JWT
+- **RolesGuard:** Valida roles del usuario contra `@Roles()` decorator
+- Usa `Reflector` para leer metadata de decoradores
+- **Aplicación:** Global via `APP_GUARD`, todas las rutas requieren auth salvo `@Public()`
 
 #### 4. Interceptores
+
 **Ubicación:** `src/gateway/interceptors/`
 
-**TransformInterceptor:**
-```typescript
-@Injectable()
-export class TransformInterceptor<T> implements NestInterceptor<T, Response<T>> {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<Response<T>> {
-    return next.handle().pipe(
-      map(data => ({
-        success: true,
-        data,
-        timestamp: new Date().toISOString(),
-      })),
-    );
-  }
-}
-```
-
-**LoggingInterceptor:**
-```typescript
-@Injectable()
-export class LoggingInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(LoggingInterceptor.name);
-
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const request = context.switchToHttp().getRequest();
-    const { method, url } = request;
-    const now = Date.now();
-
-    return next.handle().pipe(
-      tap(() => {
-        const responseTime = Date.now() - now;
-        this.logger.log(`${method} ${url} - ${responseTime}ms`);
-      }),
-    );
-  }
-}
-```
-
-**Aplicación global:**
-```typescript
-providers: [
-  {
-    provide: APP_INTERCEPTOR,
-    useClass: TransformInterceptor,  // Todas las respuestas
-  },
-  {
-    provide: APP_INTERCEPTOR,
-    useClass: LoggingInterceptor,    // Logging de tiempo
-  },
-]
-```
+- **TransformInterceptor:** Envuelve respuestas en `{ success, data, timestamp }`
+- **LoggingInterceptor:** Log de tiempo de respuesta para cada request
+- Usa RxJS `pipe`, `map`, `tap` para transformar/observar respuestas
+- **Aplicación:** Global via `APP_INTERCEPTOR` en `gateway.module.ts`
 
 ---
 
@@ -608,313 +239,76 @@ providers: [
 ### Estado: ✅ COMPLETADO
 
 #### 1. Módulo de Autenticación
+
 **Ubicación:** `src/gateway/auth/`
 
-**AuthModule:**
-```typescript
-@Module({
-  imports: [
-    PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '15m' },
-    }),
-    ClientsModule.register([microservicesConfig.USERS_SERVICE]),
-  ],
-  controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, RefreshTokenStrategy],
-  exports: [AuthService, JwtStrategy, PassportModule, JwtModule],
-})
-export class AuthModule {}
-```
+- PassportModule con estrategia 'jwt' por defecto
+- JwtModule con secret y expiresIn (15m para access token)
+- ClientsModule para comunicación con users-service
+- Providers: AuthService, JwtStrategy, RefreshTokenStrategy
+- Exports: AuthService, JwtStrategy, PassportModule, JwtModule
 
 #### 2. Estrategias JWT
-**JwtStrategy:**
-```typescript
-@Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor() {
-    super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET || 'your-secret-key',
-    });
-  }
 
-  async validate(payload: JwtPayload) {
-    return {
-      userId: payload.sub,
-      email: payload.email,
-      role: payload.role,
-    };
-  }
-}
-```
+**Ubicación:** `src/gateway/auth/strategies/`
 
-**RefreshTokenStrategy:**
-```typescript
-@Injectable()
-export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
-  constructor() {
-    super({
-      jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
-      ignoreExpiration: false,
-      secretOrKey: process.env.JWT_REFRESH_SECRET,
-    });
-  }
-
-  async validate(payload: JwtPayload) {
-    return {
-      userId: payload.sub,
-      email: payload.email,
-      role: payload.role,
-    };
-  }
-}
-```
+- **JwtStrategy:** Valida access token desde Authorization header (Bearer), extrae payload (sub, email, role)
+- **RefreshTokenStrategy:** Valida refresh token desde body, usa JWT_REFRESH_SECRET (7d expiración)
+- Ambas extienden `PassportStrategy(Strategy, 'nombre')`
+- Método `validate()` retorna objeto user para inyección en request
 
 #### 3. AuthService con JWT y Refresh Token
+
 **Ubicación:** `src/gateway/auth/auth.service.ts`
 
-```typescript
-@Injectable()
-export class AuthService {
-  constructor(
-    private jwtService: JwtService,
-    @Inject('USERS_SERVICE') private usersClient: ClientProxy,
-  ) {}
-
-  async register(registerDto: RegisterDto): Promise<AuthResponse> {
-    // Hash password
-    const hashedPassword = await bcrypt.hash(registerDto.password, 10);
-    
-    // Create user via microservice
-    const user = await firstValueFrom(
-      this.usersClient.send({ cmd: 'create_user' }, {
-        ...registerDto,
-        password: hashedPassword,
-      }),
-    );
-
-    return this.generateTokens(user);
-  }
-
-  async login(loginDto: LoginDto): Promise<AuthResponse> {
-    const user = await firstValueFrom(
-      this.usersClient.send({ cmd: 'find_user_by_email' }, loginDto.email)
-    );
-
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    const isPasswordValid = await bcrypt.compare(
-      loginDto.password,
-      user.password,
-    );
-
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    return this.generateTokens(user);
-  }
-
-  async refreshToken(userId: number): Promise<AuthResponse> {
-    const user = await firstValueFrom(
-      this.usersClient.send({ cmd: 'find_user_by_id' }, userId)
-    );
-
-    return this.generateTokens(user);
-  }
-
-  private generateTokens(user: any): AuthResponse {
-    const payload: JwtPayload = {
-      sub: user.id,
-      email: user.email,
-      role: user.role || 'user',
-    };
-
-    const accessToken = this.jwtService.sign(payload, {
-      secret: process.env.JWT_SECRET,
-      expiresIn: '15m',
-    });
-
-    const refreshToken = this.jwtService.sign(payload, {
-      secret: process.env.JWT_REFRESH_SECRET,
-      expiresIn: '7d',
-    });
-
-    return {
-      accessToken,
-      refreshToken,
-      user: { ...user, password: undefined },
-    };
-  }
-}
-```
+- **register():** Hash password con bcrypt (10 rounds), crea usuario vía RPC, genera tokens
+- **login():** Busca usuario por email vía RPC, valida password con bcrypt.compare, genera tokens
+- **refreshToken():** Busca usuario por ID, regenera access + refresh token
+- **generateTokens():** Crea payload (sub, email, role), firma accessToken (15m) y refreshToken (7d)
+- Comunica con users-service vía ClientProxy inyectado
 
 #### 4. Controlador de Autenticación
-**Endpoints implementados:**
 
-```typescript
-@ApiTags('Authentication')
-@Controller('auth')
-export class AuthController {
-  @Public()
-  @Post('register')
-  async register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
-  }
+**Ubicación:** `src/gateway/auth/auth.controller.ts`
 
-  @Public()
-  @Post('login')
-  async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
-  }
-
-  @Public()
-  @Post('refresh')
-  @UseGuards(AuthGuard('jwt-refresh'))
-  async refresh(@CurrentUser('userId') userId: number) {
-    return this.authService.refreshToken(userId);
-  }
-
-  @Get('profile')
-  @ApiBearerAuth()
-  async getProfile(@CurrentUser('userId') userId: number) {
-    return this.authService.getProfile(userId);
-  }
-}
-```
+- POST `/auth/register`: Público, body RegisterDto, retorna tokens + user
+- POST `/auth/login`: Público, body LoginDto, retorna tokens + user
+- POST `/auth/refresh`: Público pero con guard jwt-refresh, body refreshToken, retorna nuevos tokens
+- GET `/auth/profile`: Protegido, retorna datos del usuario autenticado
+- Usa decoradores `@Public()`, `@CurrentUser()`, `@ApiBearerAuth()`
 
 #### 5. Decoradores Personalizados
+
 **Ubicación:** `src/gateway/decorators/`
 
-**@Public():**
-```typescript
-export const IS_PUBLIC_KEY = 'isPublic';
-export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
-```
-
-**@Roles():**
-```typescript
-export const ROLES_KEY = 'roles';
-export const Roles = (...roles: string[]) => SetMetadata(ROLES_KEY, roles);
-```
-
-**@CurrentUser():**
-```typescript
-export const CurrentUser = createParamDecorator(
-  (data: string | undefined, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest();
-    const user = request.user;
-    return data ? user?.[data] : user;
-  },
-);
-```
+- **@Public():** SetMetadata para marcar rutas públicas, bypass JwtAuthGuard
+- **@Roles(...roles):** SetMetadata para definir roles permitidos, valida con RolesGuard
+- **@CurrentUser(key?):** ParamDecorator para inyectar user desde request, opcionalmente extrae campo específico (userId, email, role)
 
 #### 6. Protección de Rutas
-**Ejemplos de uso:**
 
-```typescript
-// Ruta pública
-@Public()
-@Get('products')
-findAll() { }
-
-// Ruta protegida (requiere autenticación)
-@Get('profile')
-@ApiBearerAuth()
-getProfile(@CurrentUser() user) { }
-
-// Ruta solo para admin
-@Roles('admin')
-@ApiBearerAuth()
-@Delete('users/:id')
-remove(@Param('id') id: string) { }
-
-// Ruta para usuarios autenticados
-@Post('orders')
-@ApiBearerAuth()
-create(@Body() dto: CreateOrderDto, @CurrentUser('userId') userId: number) { }
-```
+- **Ruta pública:** `@Public()` + endpoint
+- **Ruta protegida:** Sin decorator (JwtAuthGuard global), `@ApiBearerAuth()` para Swagger
+- **Ruta admin:** `@Roles('admin')` + `@ApiBearerAuth()`
+- **Extraer user:** `@CurrentUser()` o `@CurrentUser('userId')` en parámetros
+- Por defecto, todas las rutas requieren JWT salvo las marcadas con `@Public()`
 
 #### 7. Roles desde Base de Datos
-**User Entity con rol:**
-```typescript
-@Entity('users')
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
 
-  @Column()
-  name: string;
-
-  @Column({ unique: true })
-  email: string;
-
-  @Column()
-  password: string;
-
-  @Column({ default: 'user' })
-  role: string;  // 'user' | 'admin'
-}
-```
-
-**Roles en seeders:**
-```typescript
-await userRepository.save([
-  {
-    name: 'Admin User',
-    email: 'admin@sportsline.com',
-    password: await bcrypt.hash('admin123', 10),
-    role: 'admin',
-  },
-  {
-    name: 'Regular User',
-    email: 'user@sportsline.com',
-    password: await bcrypt.hash('user123', 10),
-    role: 'user',
-  },
-]);
-```
+- User Entity: columna `role` con default 'user', tipo enum ('user' | 'admin')
+- Seeders: usuarios con roles asignados (<admin@sportsline.com>/admin123, <user@sportsline.com>/user123)
+- Password hasheado con bcrypt en seeder
+- Rol incluido en JWT payload para validación sin consulta adicional
 
 #### 8. Flujo de Autenticación
-```
-1. POST /auth/register
-   └─> Hash password → Create user → Generate tokens
 
-2. POST /auth/login
-   └─> Validate credentials → Compare password → Generate tokens
+1. **POST /auth/register:** Hash password → RPC create user → Generate tokens
+2. **POST /auth/login:** RPC find user → Compare password → Generate tokens
+3. **POST /auth/refresh:** Validate refresh token → RPC find user → Generate new tokens
+4. **GET /auth/profile:** Validate JWT → RPC find user → Return data
+5. **Protected Route:** Request → JwtAuthGuard (valida token) → RolesGuard (valida rol) → Controller
 
-3. POST /auth/refresh
-   └─> Validate refresh token → Generate new access token
-
-4. GET /auth/profile
-   └─> Validate JWT → Return user data
-
-5. Protected Route
-   └─> JwtAuthGuard → RolesGuard → Controller
-```
-
-**Respuesta de login/register:**
-```json
-{
-  "success": true,
-  "data": {
-    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "user": {
-      "id": "uuid",
-      "name": "John Doe",
-      "email": "user@example.com",
-      "role": "user"
-    }
-  },
-  "timestamp": "2025-11-27T..."
-}
-```
+**Respuesta auth:** `{ success, data: { accessToken, refreshToken, user: { id, name, email, role } }, timestamp }`
 
 ---
 
@@ -923,47 +317,20 @@ await userRepository.save([
 ### Estado: 🔄 PENDIENTE
 
 #### 1. X-API-Key Authentication
-**Pendiente de implementar:**
-- [ ] Estrategia de API Key
-- [ ] Validación contra base de datos
-- [ ] Decorador @ApiKey()
-- [ ] Guard para validar API keys
 
-**Diseño propuesto:**
-```typescript
-// api-key.strategy.ts
-@Injectable()
-export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') {
-  async validate(apiKey: string) {
-    // Validar contra BD
-  }
-}
+**Estado:** ⏳ PENDIENTE
 
-// Uso
-@UseGuards(ApiKeyGuard)
-@Get('external/products')
-getProducts(@Headers('x-api-key') apiKey: string) { }
-```
+- Estrategia de API Key con validación contra BD
+- Decorador @ApiKey() para endpoints externos
+- Guard para validar header x-api-key
 
 #### 2. OAuth2 (Google, GitHub)
-**Pendiente de implementar:**
-- [ ] Instalación de `@nestjs/passport-google-oauth20`
-- [ ] Estrategia OAuth2
-- [ ] Endpoints de callback
-- [ ] Integración con JWT existente
 
-**Diseño propuesto:**
-```typescript
-@Get('auth/google')
-@UseGuards(AuthGuard('google'))
-async googleAuth() { }
+**Estado:** ⏳ PENDIENTE
 
-@Get('auth/google/callback')
-@UseGuards(AuthGuard('google'))
-async googleAuthCallback(@Req() req) {
-  return this.authService.validateOAuthUser(req.user);
-}
-```
+- Integración con @nestjs/passport-google-oauth20
+- Estrategia OAuth2 con callback endpoints
+- Validación y vinculación con JWT existente
 
 ---
 
@@ -972,235 +339,87 @@ async googleAuthCallback(@Req() req) {
 ### Estado: 🔄 EN PROGRESO
 
 #### 1. Swagger Documentation
+
 **Estado:** ✅ COMPLETADO
 
-**Ubicación:** `src/gateway/main.ts`
-
-```typescript
-const config = new DocumentBuilder()
-  .setTitle('Sportsline API Gateway')
-  .setDescription('HTTP facade for microservices')
-  .setVersion('1.0')
-  .addBearerAuth()  // JWT authentication
-  .build();
-
-const document = SwaggerModule.createDocument(app, config);
-SwaggerModule.setup('docs', app, document);
-```
-
-**Acceso:** http://localhost:3000/docs
-
-**DTOs documentados con decoradores:**
-```typescript
-export class LoginDto {
-  @ApiProperty({
-    description: 'User email address',
-    example: 'user@example.com',
-  })
-  @IsEmail()
-  email: string;
-
-  @ApiProperty({
-    description: 'User password',
-    example: 'password123',
-    minLength: 6,
-  })
-  @IsString()
-  @MinLength(6)
-  password: string;
-}
-```
-
-**Respuestas documentadas:**
-```typescript
-@ApiOperation({ summary: 'Login user' })
-@ApiResponse({ status: 200, description: 'User successfully logged in' })
-@ApiResponse({ status: 401, description: 'Unauthorized' })
-@Post('login')
-async login(@Body() loginDto: LoginDto) { }
-```
+- **Ubicación:** <http://localhost:3000/docs>
+- DocumentBuilder: Título, descripción, versión, addBearerAuth para JWT
+- DTOs con @ApiProperty, @ApiPropertyOptional (description, example, minLength)
+- Endpoints con @ApiOperation, @ApiResponse (status, description)
+- @ApiBearerAuth() en rutas protegidas
+- Ejemplos de login: <admin@sportsline.com>/admin123, <user@sportsline.com>/user123
 
 #### 2. Tests Unitarios
+
 **Estado:** ✅ COMPLETADO
 
-**Cobertura actual:** ~21.55%
-
-**Estructura de tests:**
-```
-test/unit/
-├── users/
-│   └── users.service.spec.ts
-├── products/
-│   └── products.service.spec.ts
-├── orders/
-│   └── orders.service.spec.ts
-├── categories/
-│   └── categories.service.spec.ts
-└── orderItems/
-    └── orderItems.service.spec.ts
-```
-
-**Comandos:**
-```bash
-npm test                 # Ejecutar todos los tests
-npm run test:watch       # Watch mode
-npm run test:cov         # Con cobertura
-npm run test:debug       # Debug mode
-```
-
-**Ejemplo de test con mocks:**
-```typescript
-describe('UsersService', () => {
-  let service: UsersService;
-  let repository: Repository<User>;
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        UsersService,
-        {
-          provide: getRepositoryToken(User),
-          useValue: {
-            create: jest.fn(),
-            save: jest.fn(),
-            find: jest.fn(),
-            findOne: jest.fn(),
-          },
-        },
-      ],
-    }).compile();
-
-    service = module.get<UsersService>(UsersService);
-    repository = module.get<Repository<User>>(getRepositoryToken(User));
-  });
-
-  it('should create a user', async () => {
-    const dto = { username: 'test', email: 'test@test.com' };
-    jest.spyOn(repository, 'create').mockReturnValue(dto as any);
-    jest.spyOn(repository, 'save').mockResolvedValue(dto as any);
-
-    const result = await service.create(dto);
-    expect(result).toEqual(dto);
-  });
-});
-```
+- **Cobertura:** ~21.55%
+- **Estructura:** test/unit/{users,products,orders,categories,orderItems}/*.spec.ts
+- Mock de repositorios con getRepositoryToken(Entity)
+- Test.createTestingModule para crear contexto
+- jest.spyOn para mockear métodos de repositorio
+- **Comandos:** `npm test`, `npm run test:watch`, `npm run test:cov`, `npm run test:debug`
 
 #### 3. SonarQube
+
 **Estado:** ⏳ PENDIENTE
 
-**Pendiente de configurar:**
-- [ ] Instalación de SonarQube local o integración con SonarCloud
-- [ ] Archivo `sonar-project.properties`
-- [ ] Configuración de análisis de código
-- [ ] Integración con CI/CD
-
-**Configuración propuesta:**
-```properties
-sonar.projectKey=sportsline-ecommerce
-sonar.projectName=Sportsline E-commerce
-sonar.sources=src
-sonar.tests=test
-sonar.typescript.lcov.reportPaths=coverage/lcov.info
-sonar.exclusions=**/node_modules/**,**/dist/**,**/*.spec.ts
-```
+- Integración con SonarQube/SonarCloud
+- Archivo sonar-project.properties con sources, tests, cobertura
+- Análisis de código y métricas de calidad
 
 #### 4. Pre-commit Hooks (Husky)
+
 **Estado:** ⏳ PENDIENTE
 
-**Pendiente de configurar:**
-- [ ] Instalación de Husky y lint-staged
-- [ ] Configuración de hooks
-- [ ] Validación de linting antes de commit
-- [ ] Ejecución de tests antes de push
-
-**Configuración propuesta:**
-```json
-// package.json
-{
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "pre-push": "npm test"
-    }
-  },
-  "lint-staged": {
-    "*.ts": [
-      "eslint --fix",
-      "prettier --write"
-    ]
-  }
-}
-```
+- Instalación de Husky + lint-staged
+- Hook pre-commit: ESLint + Prettier
+- Hook pre-push: Ejecución de tests
 
 ---
 
 ## 🚀 Cómo Ejecutar el Proyecto
 
-### Requisitos Previos
-- Node.js 18+
-- PostgreSQL 16
-- Docker & Docker Compose (opcional)
+### Requisitos
+
+- Node.js 18+, PostgreSQL 16, Docker & Docker Compose
 
 ### Instalación
+
 ```bash
-# Clonar repositorio
-git clone <repo-url>
-cd sportsline-ecommerce
-
-# Instalar dependencias
+git clone <repo-url> && cd sportsline-ecommerce
 npm install
+cp .env.example .env  # Configurar credenciales
+```
 
-# Configurar variables de entorno
-cp .env.example .env
-# Editar .env con tus credenciales
+### Ejecución Docker (Recomendado)
+
+```bash
+npm run docker        # Inicia todos los servicios
+npm run seed          # Ejecuta seed.sql
+docker-compose logs -f  # Ver logs
 ```
 
 ### Ejecución Local
+
 ```bash
-# Iniciar base de datos
 docker-compose up -d postgres
-
-# Ejecutar seeders
 npm run seed
-
-# Iniciar gateway
-npm run start:dev:gateway
-
-# En terminales separadas, iniciar microservicios
-npm run start:dev:users
-npm run start:dev:products
-npm run start:dev:orders
-npm run start:dev:order-items
-npm run start:dev:categories
-```
-
-### Ejecución con Docker
-```bash
-# Iniciar todos los servicios
-npm run start:docker
-
-# Ver logs
-docker-compose logs -f
-
-# Detener servicios
-docker-compose down
+npm run start:gateway  # Puerto 3000
+# En terminales separadas: start:users, start:products, start:orders, start:categories, start:order-items
 ```
 
 ### Acceso
-- **API Gateway:** http://localhost:3000
-- **Swagger Docs:** http://localhost:3000/docs
-- **PostgreSQL:** localhost:5432
 
-### Pruebas
+- Gateway: <http://localhost:3000>
+- Swagger: <http://localhost:3000/docs>
+- DB: localhost:8326 (puerto externo)
+
+### Tests
+
 ```bash
-# Tests unitarios
-npm test
-
-# Tests con cobertura
-npm run test:cov
-
-# Tests E2E
-npm run test:e2e
+npm test           # Unitarios
+npm run test:cov   # Con cobertura
 ```
 
 ---
@@ -1208,6 +427,7 @@ npm run test:e2e
 ## 📊 Métricas de Implementación
 
 ### ✅ Completado (70%)
+
 - Fundamentos NestJS
 - TypeORM y persistencia
 - Arquitectura modular
@@ -1221,11 +441,13 @@ npm run test:e2e
 - Tests unitarios básicos
 
 ### 🔄 En Progreso (20%)
+
 - Mejora de cobertura de tests
 - Documentación Swagger avanzada
 - Tests E2E
 
 ### ⏳ Pendiente (10%)
+
 - X-API-Key authentication
 - OAuth2 integration
 - SonarQube setup
@@ -1237,18 +459,21 @@ npm run test:e2e
 ## 📚 Referencias y Documentación
 
 ### Documentación Oficial
+
 - [NestJS Docs](https://docs.nestjs.com/)
 - [TypeORM Docs](https://typeorm.io/)
 - [Passport.js](http://www.passportjs.org/)
 - [JWT.io](https://jwt.io/)
 
 ### Arquitectura
+
 - Microservicios con TCP Transport
 - API Gateway Pattern
 - Repository Pattern
 - Dependency Injection
 
 ### Seguridad
+
 - JWT con Access & Refresh Tokens
 - Password hashing con bcryptjs
 - Role-Based Access Control (RBAC)
