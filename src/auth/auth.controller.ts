@@ -1,7 +1,10 @@
-import { Body, Controller, HttpCode, HttpStatus, Get, Post, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Get, Post, UseGuards, Request, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 import { AuthGuard } from './guards/auth.guard';
+import { ApiKeyGuard, RequireApiKeyPermission } from './guards/api-key.guard';
+import { GoogleOAuthGuard } from './guards/google-oauth.guard';
+import type { Response } from 'express';
 
 /**
  * @ApiTags() groups endpoints in Swagger UI
@@ -190,4 +193,106 @@ export class AuthController {
         return req.user;
     }
 
+    /**
+     * ADMIN ENDPOINT - Protected with API Key
+     * Example of X-API-KEY authentication
+     */
+    @ApiOperation({
+        summary: 'Get system health (Admin only)',
+        description: 'Returns system health information. Requires X-API-KEY header with "admin:health" permission.'
+    })
+    @ApiSecurity('api-key')
+    @ApiResponse({
+        status: 200,
+        description: 'System health retrieved successfully',
+        schema: {
+            type: 'object',
+            properties: {
+                status: { type: 'string', example: 'healthy' },
+                uptime: { type: 'number', example: 12345 },
+                timestamp: { type: 'string', example: '2025-12-04T10:30:00Z' }
+            }
+        }
+    })
+    @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+    @ApiResponse({ status: 403, description: 'Forbidden - API key does not have required permission' })
+    @RequireApiKeyPermission('admin:health')
+    @UseGuards(ApiKeyGuard)
+    @Get('admin/health')
+    getSystemHealth() {
+        return {
+            status: 'healthy',
+            uptime: process.uptime(),
+            timestamp: new Date().toISOString(),
+            message: 'API Key authentication successful with admin:health permission'
+        };
+    }
+
+    @ApiOperation({
+        summary: 'Initiate Google OAuth login',
+        description: 'Redirects to Google OAuth consent screen. User will be redirected back to callback URL after authentication.'
+    })
+    @ApiResponse({
+        status: 302,
+        description: 'Redirects to Google OAuth consent screen'
+    })
+    @UseGuards(GoogleOAuthGuard)
+    @Get('google')
+    async googleAuth() {
+        // Guard redirects to Google
+    }
+
+    @ApiOperation({
+        summary: 'Google OAuth callback',
+        description: 'Handles the redirect from Google after user authentication. Returns JWT tokens for the authenticated user.'
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'User authenticated successfully via Google OAuth',
+        schema: {
+            type: 'object',
+            properties: {
+                accessToken: {
+                    type: 'string',
+                    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+                    description: 'Access token (valid for 1 hour)'
+                },
+                refreshToken: {
+                    type: 'string',
+                    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+                    description: 'Refresh token (valid for 7 days)'
+                },
+                user: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+                        email: { type: 'string', example: 'user@gmail.com' },
+                        username: { type: 'string', example: 'John Doe' },
+                        provider: { type: 'string', example: 'google' }
+                    }
+                }
+            }
+        }
+    })
+    @ApiResponse({ status: 401, description: 'Google authentication failed' })
+    @UseGuards(GoogleOAuthGuard)
+    @Get('google/callback')
+    async googleAuthCallback(@Request() req, @Res() res: Response) {
+        const result = await this.authService.validateGoogleUser(req.user);
+        
+        // Redirect to frontend with tokens in query params (or use a different strategy)
+        // For now, return JSON response
+        return res.json({
+            accessToken: result.accessToken,
+            refreshToken: result.refreshToken,
+            user: {
+                id: result.user.id,
+                email: result.user.email,
+                username: result.user.username,
+                provider: result.user.provider
+            }
+        });
+    }
+
 }
+

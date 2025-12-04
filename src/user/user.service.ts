@@ -90,4 +90,32 @@ export class UserService {
     await this.userRepo.remove(user);
     return { message: 'User removed successfully' };
   }
+
+  /**
+   * GOOGLE OAUTH METHODS
+   */
+  
+  async createGoogleUser(googleData: { email: string; username: string; googleId: string; provider: string }): Promise<User> {
+    // Get default customer role
+    const customerRole = await this.roleService.findByName('customer');
+    if (!customerRole) throw new BadRequestException('Customer role not found');
+
+    const user = this.userRepo.create({
+      ...googleData,
+      password: undefined,  // OAuth users don't have password
+      role: customerRole,
+    });
+
+    return this.userRepo.save(user);
+  }
+
+  async updateGoogleId(userId: number, googleId: string): Promise<User> {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    
+    user.googleId = googleId;
+    user.provider = 'google';
+    
+    return this.userRepo.save(user);
+  }
 }

@@ -44,6 +44,18 @@ async function bootstrap() {
       'JWT-auth',  // Reference name to use in controllers with @ApiBearerAuth('JWT-auth')
     )
     
+    // Add API Key authentication scheme
+    // This allows endpoints to be protected with X-API-KEY header
+    .addApiKey(
+      {
+        type: 'apiKey',         // Authentication type
+        name: 'X-API-KEY',      // Header name
+        in: 'header',           // Where to send the key
+        description: 'API Key for external integrations and admin operations',
+      },
+      'api-key',  // Reference name to use in controllers with @ApiSecurity('api-key')
+    )
+    
     // Add API tags for grouping endpoints
     .addTag('Authentication', 'User registration, login, and profile management')
     .addTag('Users', 'User CRUD operations (Admin only)')

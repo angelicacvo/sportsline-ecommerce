@@ -8,6 +8,7 @@ import { OrderItemsModule } from './order-items/order-items.module';
 import { AuthModule } from './auth/auth.module';
 import { RoleModule } from './role/role.module';
 import { PermissionModule } from './permission/permission.module';
+import { ApiKeyModule } from './api-key/api-key.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { ValidationMiddleware } from './common/middleware/validation.middleware';
 
@@ -20,8 +21,9 @@ import { ValidationMiddleware } from './common/middleware/validation.middleware'
     OrderModule, 
     OrderItemsModule, 
     AuthModule,
-    RoleModule,        // ← Nuevo módulo de roles
-    PermissionModule,  // ← Nuevo módulo de permisos
+    RoleModule,
+    PermissionModule,
+    ApiKeyModule,      // ← Nuevo módulo de API Keys
   ],
 })
 export class AppModule implements NestModule {

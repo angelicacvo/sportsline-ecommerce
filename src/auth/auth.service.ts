@@ -71,4 +71,47 @@ export class AuthService {
             throw new UnauthorizedException('Invalid or expired refresh token');
         }
     }
+
+    /**
+     * Week 6: OAuth User Validation
+     * Similar to validateUser() from Week 5, but for Google OAuth
+     * - Checks if user exists by email
+     * - Creates new user if not found (using UserService from Week 3)
+     * - Links Google account to existing user
+     * - Returns JWT tokens (Week 5 pattern)
+     */
+    async validateGoogleUser(googleProfile: any): Promise<{ accessToken: string; refreshToken: string; user: any }> {
+        const { googleId, email, firstName, lastName } = googleProfile;
+
+        // Check if user already exists
+        let user = await this.userService.findByEmail(email);
+
+        if (!user) {
+            // Create new user from Google profile
+            user = await this.userService.createGoogleUser({
+                email,
+                username: `${firstName}${lastName}`.toLowerCase(),
+                googleId,
+                provider: 'google',
+            });
+        } else if (!user.googleId) {
+            user = await this.userService.updateGoogleId(user.id, googleId);
+        }
+
+        // Safety check
+        if (!user) {
+            throw new UnauthorizedException('Failed to create or find user');
+        }
+
+        const payload = {
+            sub: user.id,
+            email: user.email,
+            role: user.role.name,
+        };
+
+        const accessToken = await this.jwtService.signAsync(payload, { expiresIn: '1h' });
+        const refreshToken = await this.jwtService.signAsync(payload, { expiresIn: '7d' });
+
+        return { accessToken, refreshToken, user };
+    }
 }
