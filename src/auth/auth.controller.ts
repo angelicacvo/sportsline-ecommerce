@@ -1,7 +1,8 @@
 import { Body, Controller, HttpCode, HttpStatus, Get, Post, UseGuards, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 import { AuthGuard } from './guards/auth.guard';
+import { ApiKeyGuard } from './guards/api-key.guard';
 
 /**
  * @ApiTags() groups endpoints in Swagger UI
@@ -188,6 +189,39 @@ export class AuthController {
     @Get('profile')
     getProfile(@Request() req) {
         return req.user;
+    }
+
+    /**
+     * ADMIN ENDPOINT - Protected with API Key
+     * Example of X-API-KEY authentication
+     */
+    @ApiOperation({
+        summary: 'Get system health (Admin only)',
+        description: 'Returns system health information. Requires X-API-KEY header for authentication.'
+    })
+    @ApiSecurity('api-key')
+    @ApiResponse({
+        status: 200,
+        description: 'System health retrieved successfully',
+        schema: {
+            type: 'object',
+            properties: {
+                status: { type: 'string', example: 'healthy' },
+                uptime: { type: 'number', example: 12345 },
+                timestamp: { type: 'string', example: '2025-12-04T10:30:00Z' }
+            }
+        }
+    })
+    @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+    @UseGuards(ApiKeyGuard)
+    @Get('admin/health')
+    getSystemHealth() {
+        return {
+            status: 'healthy',
+            uptime: process.uptime(),
+            timestamp: new Date().toISOString(),
+            message: 'API Key authentication successful'
+        };
     }
 
 }

@@ -5,6 +5,7 @@ import { UserModule } from 'src/user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthGuard } from './guards/auth.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { ApiKeyGuard } from './guards/api-key.guard';
 
 @Module({
   controllers: [AuthController],
@@ -12,6 +13,7 @@ import { RolesGuard } from './guards/roles.guard';
     AuthService,
     AuthGuard,
     RolesGuard,
+    ApiKeyGuard,
   ],
   imports: [
     forwardRef(() => UserModule),
@@ -21,6 +23,6 @@ import { RolesGuard } from './guards/roles.guard';
       signOptions: { expiresIn: '1h' },
     }),
   ],
-  exports: [AuthGuard, RolesGuard],
+  exports: [AuthGuard, RolesGuard, ApiKeyGuard],
 })
 export class AuthModule { }
