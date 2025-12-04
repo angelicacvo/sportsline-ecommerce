@@ -18,25 +18,24 @@ export class UsersService {
     return this.userRepository.findOne({ where: { email } });
   }
 
-async create(data: any) {
-  const newUser = this.userRepository.create(data);
-  return this.userRepository.save(newUser);  // <--- devuelve un User, no un array
-}
+  async create(data: any) {
+    const newUser = this.userRepository.create(data);
+    return this.userRepository.save(newUser); // <--- devuelve un User, no un array
+  }
 
-async createGoogleUser(data: any) {
-  const user = this.userRepository.create({
-    name: data.name,
-    email: data.email,
-    password: null,
-    role: 'user',
-    provider: 'google',
-    providerId: data.providerId,
-    avatar: data.avatar,
-  });
+  async createGoogleUser(data: any) {
+    const user = this.userRepository.create({
+      name: data.name,
+      email: data.email,
+      password: null,
+      role: 'user',
+      provider: 'google',
+      providerId: data.providerId,
+      avatar: data.avatar,
+    });
 
-  return await this.userRepository.save(user);
-}
-
+    return await this.userRepository.save(user);
+  }
 
   async findAll() {
     return this.userRepository.find();

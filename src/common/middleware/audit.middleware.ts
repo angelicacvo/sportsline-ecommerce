@@ -12,7 +12,9 @@ export class AuditMiddleware implements NestMiddleware {
 
     // Ejemplo simple de validación básica
     if (method === 'POST' && !body) {
-      return res.status(400).json({ message: 'El cuerpo de la petición no puede estar vacío' });
+      return res
+        .status(400)
+        .json({ message: 'El cuerpo de la petición no puede estar vacío' });
     }
 
     next();

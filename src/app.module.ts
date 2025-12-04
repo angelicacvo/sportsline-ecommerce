@@ -7,12 +7,11 @@ import { ProductsModule } from './products/product.module';
 import { ClientsModule } from './clients/client.module';
 import { OrdersModule } from './orders/order.module';
 import { AuthModule } from './auth/auth.module';
-import { ApiKeyModule } from './api-key/api-key.module';
+
 import { User } from './users/user.entity';
 import { Product } from './products/product.entity';
 import { Client } from './clients/client.entity';
 import { Order } from './orders/order.entity';
-
 
 @Module({
   imports: [
@@ -20,7 +19,7 @@ import { Order } from './orders/order.entity';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    
+
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
@@ -32,7 +31,7 @@ import { Order } from './orders/order.entity';
       synchronize: true,
     }),
 
-    AuthModule, 
+    AuthModule,
     UsersModule,
     ProductsModule,
     ClientsModule,
@@ -40,7 +39,5 @@ import { Order } from './orders/order.entity';
   ],
 })
 export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-  }
+  configure(_consumer: MiddlewareConsumer) {}
 }
-

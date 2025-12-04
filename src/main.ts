@@ -16,7 +16,9 @@ async function bootstrap() {
   // 🔹 Configuración Swagger
   const config = new DocumentBuilder()
     .setTitle('SportsLine API')
-    .setDescription('Documentación de autenticación JWT, Roles y OAuth2 con Google')
+    .setDescription(
+      'Documentación de autenticación JWT, Roles y OAuth2 con Google',
+    )
     .setVersion('1.0')
     .addBearerAuth(
       {

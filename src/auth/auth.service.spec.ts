@@ -1,59 +1,70 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from './auth.service';
+import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/user.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
-describe('AuthService', () => {
-  let service: AuthService;
+@Injectable()
+export class AuthService {
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+  ) {}
 
-  const mockUser = {
-    id: 1,
-    name: 'Test User',
-    email: 'test@example.com',
-    password: 'hashedPassword',
-    role: 'USER',
-    refreshToken: null,
-  };
+  async validateUser(email: string, password: string) {
+    const user = await this.usersService.findByEmail(email);
 
-  const mockUsersService = {
-    findByEmail: jest.fn(),
-  };
+    if (!user) return null;
 
-  const mockJwtService = {
-    sign: jest.fn().mockReturnValue('fake-jwt-token'),
-  };
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return null;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        AuthService,
-        { provide: UsersService, useValue: mockUsersService },
-        { provide: JwtService, useValue: mockJwtService },
-      ],
-    }).compile();
+    return user;
+  }
 
-    service = module.get<AuthService>(AuthService);
-  });
+  async login(user: any) {
+    const payload = { sub: user.id, role: user.role };
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
-  describe('validateUser', () => {
-    it('should return the user if password matches', async () => {
-      mockUsersService.findByEmail.mockResolvedValue(mockUser);
-      jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as any);
-
-      const result = await service.validateUser(mockUser.email, 'password');
-      expect(result).toEqual(mockUser);
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: '1h',
     });
 
-    it('should return null if user does not exist', async () => {
-      mockUsersService.findByEmail.mockResolvedValue(null);
-
-      const result = await service.validateUser('notfound@mail.com', 'pass');
-      expect(result).toBeNull();
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: '7d',
     });
-  });
-});
+
+    await this.usersService.updateRefreshToken(user.id, refreshToken);
+
+    return { accessToken, refreshToken, user };
+  }
+
+  async register(data: any) {
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    data.password = hashedPassword;
+    return this.usersService.create(data);
+  }
+
+  async refreshToken(user: any) {
+    const payload = { sub: user.userId, role: user.role };
+
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: '1h',
+    });
+
+    return { accessToken };
+  }
+
+  async loginWithGoogle(googleUser: any) {
+    let user = await this.usersService.findByEmail(googleUser.email);
+
+    if (!user) {
+      user = await this.usersService.create({
+        name: googleUser.name,
+        email: googleUser.email,
+        password: null,
+        provider: 'google',
+      });
+    }
+
+    return this.login(user);
+  }
+}

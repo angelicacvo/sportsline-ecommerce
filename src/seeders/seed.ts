@@ -8,9 +8,12 @@ async function seed() {
   const userRepo = AppDataSource.getRepository(User);
   const productRepo = AppDataSource.getRepository(Product);
 
-  const user = userRepo.create({ name: 'Admin', email: 'admin@shop.com', password: '1234' });
- const product = productRepo.create({ name: 'Laptop', price: 1200 });
-
+  const user = userRepo.create({
+    name: 'Admin',
+    email: 'admin@shop.com',
+    password: '1234',
+  });
+  const product = productRepo.create({ name: 'Laptop', price: 1200 });
 
   await userRepo.save(user);
   await productRepo.save(product);

@@ -12,7 +12,7 @@ export class ApiKeyService {
 
   findByKey(key: string) {
     return this.apiKeyRepository.findOne({
-      where: { key, enabled: true }
+      where: { key, enabled: true },
     });
   }
 }

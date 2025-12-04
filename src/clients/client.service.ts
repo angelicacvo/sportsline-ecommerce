@@ -13,7 +13,6 @@ export class ClientsService {
   ) {}
 
   create(dto: CreateClientDto) {
-    
     const client = this.clientRepo.create(dto);
     return this.clientRepo.save(client);
   }
@@ -27,8 +26,7 @@ export class ClientsService {
   }
 
   update(id: number, dto: UpdateClientDto) {
-return this.clientRepo.update(id, { ...dto });
-
+    return this.clientRepo.update(id, { ...dto });
   }
 
   remove(id: number) {

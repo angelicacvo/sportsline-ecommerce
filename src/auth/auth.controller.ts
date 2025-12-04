@@ -5,6 +5,7 @@ import {
   Req,
   UseGuards,
   Get,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -17,10 +18,12 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() body: LoginDto) {
-    const user = await this.authService.validateUser(
-      body.email,
-      body.password,
-    );
+    const user = await this.authService.validateUser(body.email, body.password);
+
+    if (!user) {
+      throw new UnauthorizedException('Credenciales incorrectas');
+    }
+
     return this.authService.login(user);
   }
 
@@ -41,12 +44,9 @@ export class AuthController {
     return;
   }
 
-
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req) {
-    const user = req.user;
-
-    return this.authService.loginWithGoogle(user);
+    return this.authService.loginWithGoogle(req.user);
   }
 }

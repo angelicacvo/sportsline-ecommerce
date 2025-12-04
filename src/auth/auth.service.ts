@@ -78,7 +78,9 @@ export class AuthService {
     } else {
       // Si existe pero no tiene provider/provideId, podemos actualizarlo (opcional)
       const needsUpdate =
-        user.provider !== 'google' || user.providerId !== providerId || !user.avatar;
+        user.provider !== 'google' ||
+        user.providerId !== providerId ||
+        !user.avatar;
       if (needsUpdate) {
         await this.usersService.update(user.id, {
           provider: 'google',
