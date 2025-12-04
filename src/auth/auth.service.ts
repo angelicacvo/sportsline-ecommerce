@@ -77,9 +77,9 @@ export class AuthService {
      * Validates or creates user from Google profile
      * 
      * @param googleProfile - User data from Google OAuth
-     * @returns JWT tokens for the user
+     * @returns JWT tokens and user data
      */
-    async validateGoogleUser(googleProfile: any): Promise<{ accessToken: string; refreshToken: string }> {
+    async validateGoogleUser(googleProfile: any): Promise<{ accessToken: string; refreshToken: string; user: any }> {
         const { googleId, email, firstName, lastName } = googleProfile;
 
         // Check if user already exists
@@ -108,6 +108,6 @@ export class AuthService {
         const accessToken = await this.jwtService.signAsync(payload, { expiresIn: '1h' });
         const refreshToken = await this.jwtService.signAsync(payload, { expiresIn: '7d' });
 
-        return { accessToken, refreshToken };
+        return { accessToken, refreshToken, user };
     }
 }

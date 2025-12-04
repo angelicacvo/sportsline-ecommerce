@@ -4,7 +4,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth, ApiSecurity
 import { AuthGuard } from './guards/auth.guard';
 import { ApiKeyGuard, RequireApiKeyPermission } from './guards/api-key.guard';
 import { GoogleOAuthGuard } from './guards/google-oauth.guard';
-import { Response } from 'express';
+import type { Response } from 'express';
 
 /**
  * @ApiTags() groups endpoints in Swagger UI
