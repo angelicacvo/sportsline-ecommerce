@@ -22,7 +22,7 @@ export class OrderService {
   ) {}
 
   async create(createOrderDto: CreateOrderDto) {
-    const client = await this.clientRepo.findOne({ where: { id: createOrderDto.clientId.toString() } });
+    const client = await this.clientRepo.findOne({ where: { id: createOrderDto.clientId } });
     if (!client) throw new BadRequestException('Client not found');
 
     if (!createOrderDto.items || createOrderDto.items.length === 0) {
@@ -33,7 +33,7 @@ export class OrderService {
     let total = 0;
 
     for (const itemDto of createOrderDto.items) {
-      const product = await this.productRepo.findOne({ where: { id: itemDto.productId.toString() } });
+      const product = await this.productRepo.findOne({ where: { id: itemDto.productId } });
       if (!product) throw new BadRequestException(`Product ${itemDto.productId} not found`);
       const price = itemDto.price ?? product.price;
       const orderItem = this.orderItemRepo.create({
@@ -67,13 +67,13 @@ export class OrderService {
   }
 
   async findOne(id: number) {
-    const order = await this.orderRepo.findOne({ where: { id: id.toString() }, relations: ['client', 'items', 'items.product'] });
+    const order = await this.orderRepo.findOne({ where: { id }, relations: ['client', 'items', 'items.product'] });
     if (!order) throw new NotFoundException('Order not found');
     return order;
   }
 
   async update(id: number, updateOrderDto: UpdateOrderDto) {
-    const order = await this.orderRepo.findOne({ where: { id: id.toString() }, relations: ['client', 'items', 'items.product'] });
+    const order = await this.orderRepo.findOne({ where: { id }, relations: ['client', 'items', 'items.product'] });
     if (!order) throw new NotFoundException('Order not found');
     // Only status change supported for now
     if (updateOrderDto['status']) {
@@ -88,7 +88,7 @@ export class OrderService {
   }
 
   async remove(id: number) {
-    const order = await this.orderRepo.findOne({ where: { id: id.toString() } });
+    const order = await this.orderRepo.findOne({ where: { id } });
     if (!order) throw new NotFoundException('Order not found');
     await this.orderRepo.remove(order);
     return { message: 'Order removed successfully' };

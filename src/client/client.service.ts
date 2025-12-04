@@ -31,7 +31,7 @@ export class ClientService {
     return this.clientRepository.find();
   }
 
-  async findOne(id: string): Promise<Client> {
+  async findOne(id: number): Promise<Client> {
     const client = await this.clientRepository.findOne({
       where: { id },
     });
@@ -44,7 +44,7 @@ export class ClientService {
   }
 
   async update(id: number, updateClientDto: UpdateClientDto): Promise<Client> {
-    const client = await this.clientRepository.findOne({ where: { id: id.toString() } });
+    const client = await this.clientRepository.findOne({ where: { id } });
     if (!client) {
       throw new NotFoundException('Client not found');
     }
@@ -53,7 +53,7 @@ export class ClientService {
       where: { email: updateClientDto.email },
     });
 
-    if (existingClient && existingClient.id !== id.toString()) {
+    if (existingClient && existingClient.id !== id) {
       throw new BadRequestException('Client with this email already exists');
     }
 
@@ -63,7 +63,7 @@ export class ClientService {
   }
 
   async remove(id: number): Promise<{message: string}> {
-    const client = await this.clientRepository.findOne({ where: { id: id.toString() } });
+    const client = await this.clientRepository.findOne({ where: { id } });
     
     if (!client) {
       throw new NotFoundException('Client not found');

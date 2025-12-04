@@ -5,7 +5,7 @@ import { User } from "../../user/entities/user.entity";
 @Entity('products')
 export class Product {
     @PrimaryGeneratedColumn()
-    id: string;
+    id: number;
 
     @Column({ unique: true })
     code: string

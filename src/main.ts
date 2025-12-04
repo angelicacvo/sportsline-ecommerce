@@ -25,15 +25,10 @@ async function bootstrap() {
 
   app.enableCors();
 
-  // ========================================
-  // SWAGGER CONFIGURATION
-  // ========================================
-  
-  // STEP 1: Create a configuration object with API metadata
+  // Create a configuration object with API metadata
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('Sportsline E-commerce API')           // API title shown at the top
-    .setDescription('REST API for sports e-commerce platform with authentication, products, orders, and user management')  // API description
-    .setVersion('1.0')                               // API version
+    .setTitle('Sportsline E-commerce API')           
+    .setDescription('REST API for sports e-commerce platform with authentication, products, orders, and user management')  // API description                              
     
     // Add JWT authentication scheme
     // This tells Swagger that routes can be protected with JWT Bearer tokens
@@ -57,12 +52,6 @@ async function bootstrap() {
     .addTag('Orders', 'Order processing and management')
     .addTag('Order Items', 'Individual items within orders')
     
-    // Add contact information (optional)
-    .setContact(
-      'Riwi Development Team',
-      'https://riwi.io',
-      'support@riwi.io'
-    )
     
     .build();  // Build the configuration object
 
@@ -72,13 +61,13 @@ async function bootstrap() {
 
   // STEP 3: Setup Swagger UI
   // SwaggerModule.setup(path, app, document) creates the UI at the specified path
-  // Access it at: http://localhost:3000/api/docs
+  // Access it at: http://localhost:3000/docs
   SwaggerModule.setup('docs', app, document, {
     // Swagger UI options
     swaggerOptions: {
       persistAuthorization: true,  // Keep authorization token after page refresh
       docExpansion: 'none',         // Collapse all sections by default ('none', 'list', 'full')
-      filter: true,                 // Enable search/filter box
+      filter: true,                 // Enable search/filter boxs
       showRequestDuration: true,    // Show how long requests take
     },
   });
@@ -86,6 +75,6 @@ async function bootstrap() {
   const port = config.get<number>('PORT') || 3000;
   await app.listen(port);
   console.log(`Application is running on: http://localhost:${port}`);
-  console.log(`Swagger documentation available at: http://localhost:${port}/api/docs`);
+  console.log(`Swagger documentation available at: http://localhost:${port}/docs`);
 }
 bootstrap();
