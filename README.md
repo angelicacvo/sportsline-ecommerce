@@ -1,3 +1,21 @@
+# .env
+```bash
+PORT=3000
+NODE_ENV=development
+
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASS=1234   
+DB_NAME=sportsline
+
+JWT_SECRET=super_secreto
+JWT_EXPIRES_IN=1d
+GOOGLE_CLIENT_ID=63711274258-i4j9qmqgmvnrbdj363nal8hli7jc62k0.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=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
+CLIENT_URL=http://localhost:4200
+```
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
