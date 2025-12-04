@@ -2,7 +2,7 @@ import { Body, Controller, HttpCode, HttpStatus, Get, Post, UseGuards, Request, 
 import { AuthService } from './auth.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 import { AuthGuard } from './guards/auth.guard';
-import { ApiKeyGuard } from './guards/api-key.guard';
+import { ApiKeyGuard, RequireApiKeyPermission } from './guards/api-key.guard';
 import { GoogleOAuthGuard } from './guards/google-oauth.guard';
 import { Response } from 'express';
 
@@ -199,7 +199,7 @@ export class AuthController {
      */
     @ApiOperation({
         summary: 'Get system health (Admin only)',
-        description: 'Returns system health information. Requires X-API-KEY header for authentication.'
+        description: 'Returns system health information. Requires X-API-KEY header with "admin:health" permission.'
     })
     @ApiSecurity('api-key')
     @ApiResponse({
@@ -215,6 +215,8 @@ export class AuthController {
         }
     })
     @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+    @ApiResponse({ status: 403, description: 'Forbidden - API key does not have required permission' })
+    @RequireApiKeyPermission('admin:health')
     @UseGuards(ApiKeyGuard)
     @Get('admin/health')
     getSystemHealth() {
@@ -222,7 +224,7 @@ export class AuthController {
             status: 'healthy',
             uptime: process.uptime(),
             timestamp: new Date().toISOString(),
-            message: 'API Key authentication successful'
+            message: 'API Key authentication successful with admin:health permission'
         };
     }
 

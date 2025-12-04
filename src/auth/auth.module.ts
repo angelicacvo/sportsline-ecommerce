@@ -7,6 +7,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { ApiKeyGuard } from './guards/api-key.guard';
 import { GoogleStrategy } from './strategies/google.strategy';
+import { ApiKeyModule } from 'src/api-key/api-key.module';
 
 @Module({
   controllers: [AuthController],
@@ -19,6 +20,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
   ],
   imports: [
     forwardRef(() => UserModule),
+    ApiKeyModule,
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,
