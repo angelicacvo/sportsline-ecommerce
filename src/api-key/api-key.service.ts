@@ -5,7 +5,12 @@ import { ApiKey } from './entities/api-key.entity';
 import { CreateApiKeyDto } from './dto/create-api-key.dto';
 import { UpdateApiKeyDto } from './dto/update-api-key.dto';
 
-// Service to manage API Keys and their permissions
+/**
+ * API Key Service - Week 6
+ * Standard CRUD service pattern (Week 3)
+ * Uses TypeORM Repository (Week 2) for database operations
+ * Validates permissions for external service authentication
+ */
 @Injectable()
 export class ApiKeyService {
     constructor(
@@ -59,7 +64,11 @@ export class ApiKeyService {
         await this.apiKeyRepository.remove(apiKey);
     }
 
-    // Validates API key and checks optional permissions
+    /**
+     * Validates API key and checks optional permissions
+     * Used by ApiKeyGuard (Week 6) to authorize requests
+     * Returns: isValid, apiKey entity, hasPermission boolean
+     */
     async validateKey(key: string, requiredPermission?: string): Promise<{
         isValid: boolean;
         apiKey?: ApiKey;

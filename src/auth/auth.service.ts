@@ -72,7 +72,14 @@ export class AuthService {
         }
     }
 
-    // Validates or creates user from Google OAuth profile
+    /**
+     * Week 6: OAuth User Validation
+     * Similar to validateUser() from Week 5, but for Google OAuth
+     * - Checks if user exists by email
+     * - Creates new user if not found (using UserService from Week 3)
+     * - Links Google account to existing user
+     * - Returns JWT tokens (Week 5 pattern)
+     */
     async validateGoogleUser(googleProfile: any): Promise<{ accessToken: string; refreshToken: string; user: any }> {
         const { googleId, email, firstName, lastName } = googleProfile;
 

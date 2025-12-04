@@ -1,5 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
+/**
+ * API Key Entity - Week 6
+ * TypeORM entity (Week 2 concepts)
+ * Stores API keys for external service authentication
+ * Each key has permissions array for granular access control
+ */
 @Entity('api_keys')
 export class ApiKey {
     @PrimaryGeneratedColumn('uuid')

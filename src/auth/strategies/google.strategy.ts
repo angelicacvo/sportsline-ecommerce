@@ -3,7 +3,12 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback, StrategyOptions } from 'passport-google-oauth20';
 import { ConfigService } from '@nestjs/config';
 
-// Strategy for Google OAuth2 authentication
+/**
+ * Google OAuth2 Strategy - Week 6: Advanced Authentication
+ * Extends PassportStrategy (similar to JwtStrategy from Week 5)
+ * Uses ConfigService (Week 1) to read environment variables
+ * Handles OAuth flow: Google login → callback → user profile
+ */
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(private configService: ConfigService) {

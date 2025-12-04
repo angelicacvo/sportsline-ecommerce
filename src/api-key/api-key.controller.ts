@@ -7,6 +7,12 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 
+/**
+ * API Key Controller - Week 6
+ * Standard REST controller (Week 3 pattern)
+ * Protected by AuthGuard + RolesGuard (Week 5) - only admins can manage API keys
+ * Swagger documented (Week 7 requirement)
+ */
 @ApiTags('API Keys')
 @ApiBearerAuth()
 @UseGuards(AuthGuard, RolesGuard)

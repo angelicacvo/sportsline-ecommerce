@@ -3,14 +3,19 @@ import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { ApiKeyService } from '../../api-key/api-key.service';
 
-// Metadata key for API key permissions
+// Metadata key for API key permissions (similar to roles metadata from Week 5)
 export const API_KEY_PERMISSIONS = 'api_key_permissions';
 
-// Decorator to specify required permissions for a route
+// Custom decorator (learned in Week 4) to specify required permissions for a route
 export const RequireApiKeyPermission = (...permissions: string[]) => 
     SetMetadata(API_KEY_PERMISSIONS, permissions);
 
-// Guard to validate X-API-KEY against database with permission system
+/**
+ * API Key Guard - Week 6: Advanced Authentication
+ * Similar to AuthGuard from Week 5, but validates X-API-KEY header instead of JWT
+ * Uses Reflector (Week 4) to read route metadata and check permissions
+ * Implements CanActivate interface (Week 4 Guards concept)
+ */
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
     constructor(
