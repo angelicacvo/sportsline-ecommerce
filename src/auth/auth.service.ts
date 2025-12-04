@@ -72,7 +72,7 @@ export class AuthService {
         }
     }
 
-    // Valida o crea usuario desde perfil de Google OAuth
+    // Validates or creates user from Google OAuth profile
     async validateGoogleUser(googleProfile: any): Promise<{ accessToken: string; refreshToken: string; user: any }> {
         const { googleId, email, firstName, lastName } = googleProfile;
 

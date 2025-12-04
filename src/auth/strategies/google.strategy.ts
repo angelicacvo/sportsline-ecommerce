@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback, StrategyOptions } from 'passport-google-oauth20';
 import { ConfigService } from '@nestjs/config';
 
-// Estrategia para autenticación con Google OAuth2
+// Strategy for Google OAuth2 authentication
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(private configService: ConfigService) {
@@ -15,7 +15,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     } as StrategyOptions);
   }
 
-  // Procesa los datos del usuario después de autenticación exitosa con Google
+  // Process user data after successful Google authentication
   async validate(
     accessToken: string,
     refreshToken: string,

@@ -3,14 +3,14 @@ import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { ApiKeyService } from '../../api-key/api-key.service';
 
-// Metadata key para permisos de API key
+// Metadata key for API key permissions
 export const API_KEY_PERMISSIONS = 'api_key_permissions';
 
-// Decorator para especificar permisos requeridos en una ruta
+// Decorator to specify required permissions for a route
 export const RequireApiKeyPermission = (...permissions: string[]) => 
     SetMetadata(API_KEY_PERMISSIONS, permissions);
 
-// Guard para validar X-API-KEY contra base de datos con sistema de permisos
+// Guard to validate X-API-KEY against database with permission system
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
     constructor(

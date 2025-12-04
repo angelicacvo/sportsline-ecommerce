@@ -5,7 +5,7 @@ import { ApiKey } from './entities/api-key.entity';
 import { CreateApiKeyDto } from './dto/create-api-key.dto';
 import { UpdateApiKeyDto } from './dto/update-api-key.dto';
 
-// Servicio para gestionar API Keys y sus permisos
+// Service to manage API Keys and their permissions
 @Injectable()
 export class ApiKeyService {
     constructor(
@@ -59,7 +59,7 @@ export class ApiKeyService {
         await this.apiKeyRepository.remove(apiKey);
     }
 
-    // Valida API key y verifica permisos opcionales
+    // Validates API key and checks optional permissions
     async validateKey(key: string, requiredPermission?: string): Promise<{
         isValid: boolean;
         apiKey?: ApiKey;
