@@ -71,4 +71,43 @@ export class AuthService {
             throw new UnauthorizedException('Invalid or expired refresh token');
         }
     }
+
+    /**
+     * GOOGLE OAUTH LOGIN
+     * Validates or creates user from Google profile
+     * 
+     * @param googleProfile - User data from Google OAuth
+     * @returns JWT tokens for the user
+     */
+    async validateGoogleUser(googleProfile: any): Promise<{ accessToken: string; refreshToken: string }> {
+        const { googleId, email, firstName, lastName } = googleProfile;
+
+        // Check if user already exists
+        let user = await this.userService.findByEmail(email);
+
+        if (!user) {
+            // Create new user from Google profile
+            user = await this.userService.createGoogleUser({
+                email,
+                username: `${firstName}${lastName}`.toLowerCase(),
+                googleId,
+                provider: 'google',
+            });
+        } else if (!user.googleId) {
+            // Link existing account with Google
+            user = await this.userService.updateGoogleId(user.id, googleId);
+        }
+
+        // Generate JWT tokens
+        const payload = {
+            sub: user.id,
+            email: user.email,
+            role: user.role.name,
+        };
+
+        const accessToken = await this.jwtService.signAsync(payload, { expiresIn: '1h' });
+        const refreshToken = await this.jwtService.signAsync(payload, { expiresIn: '7d' });
+
+        return { accessToken, refreshToken };
+    }
 }

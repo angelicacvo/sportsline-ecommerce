@@ -23,8 +23,18 @@ export class User {
     @Column()
     email: string;
 
-    @Column()
+    @Column({ nullable: true })
     password: string;
+
+    /**
+     * OAuth provider fields
+     * Stores external authentication provider IDs
+     */
+    @Column({ nullable: true })
+    googleId: string;
+
+    @Column({ default: 'local' })
+    provider: string;  // 'local', 'google', 'facebook', etc.
 
     /**
      * RELACIÓN MANY TO ONE con Role

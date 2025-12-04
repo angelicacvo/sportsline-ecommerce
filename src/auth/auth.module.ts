@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthGuard } from './guards/auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { ApiKeyGuard } from './guards/api-key.guard';
+import { GoogleStrategy } from './strategies/google.strategy';
 
 @Module({
   controllers: [AuthController],
@@ -14,6 +15,7 @@ import { ApiKeyGuard } from './guards/api-key.guard';
     AuthGuard,
     RolesGuard,
     ApiKeyGuard,
+    GoogleStrategy,
   ],
   imports: [
     forwardRef(() => UserModule),
