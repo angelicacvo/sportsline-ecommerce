@@ -3,59 +3,14 @@ import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { ApiKeyService } from '../../api-key/api-key.service';
 
-/**
- * Metadata key for specifying required permissions on routes
- */
+// Metadata key para permisos de API key
 export const API_KEY_PERMISSIONS = 'api_key_permissions';
 
-/**
- * Decorator to specify required API key permissions for a route
- * 
- * @example
- * ```typescript
- * @RequireApiKeyPermission('read:products')
- * @UseGuards(ApiKeyGuard)
- * @Get('products')
- * getProducts() {}
- * 
- * @RequireApiKeyPermission('write:orders', 'admin:users')
- * @UseGuards(ApiKeyGuard)
- * @Post('admin/users')
- * createUser() {}
- * ```
- */
+// Decorator para especificar permisos requeridos en una ruta
 export const RequireApiKeyPermission = (...permissions: string[]) => 
     SetMetadata(API_KEY_PERMISSIONS, permissions);
 
-/**
- * API KEY GUARD (Database-backed)
- * 
- * Protects endpoints using X-API-KEY header authentication with database validation.
- * 
- * Features:
- * - Validates API keys against database
- * - Checks key expiration
- * - Verifies key is active
- * - Enforces permission-based access control
- * - Tracks last usage timestamp
- * 
- * Usage:
- * ```typescript
- * // Simple API key authentication
- * @UseGuards(ApiKeyGuard)
- * @Get('admin/stats')
- * getStats() {}
- * 
- * // With permission check
- * @RequireApiKeyPermission('read:products')
- * @UseGuards(ApiKeyGuard)
- * @Get('products')
- * getProducts() {}
- * ```
- * 
- * Client must send header:
- * X-API-KEY: sk_prod_your_api_key_here
- */
+// Guard para validar X-API-KEY contra base de datos con sistema de permisos
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
     constructor(

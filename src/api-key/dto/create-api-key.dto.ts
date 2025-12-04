@@ -1,22 +1,6 @@
 import { IsString, IsArray, IsBoolean, IsOptional, IsDate, MinLength, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-/**
- * Data Transfer Object for creating a new API Key.
- * 
- * This DTO validates the input data when creating an API key through the API.
- * 
- * @example
- * ```json
- * {
- *   "name": "Mobile App",
- *   "key": "sk_prod_abc123xyz456",
- *   "permissions": ["read:products", "write:orders"],
- *   "description": "API key for mobile application",
- *   "expiresAt": "2026-12-31T23:59:59Z"
- * }
- * ```
- */
 export class CreateApiKeyDto {
     @ApiProperty({
         description: 'Friendly name for the API key',

@@ -7,12 +7,6 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 
-/**
- * Controller for managing API Keys.
- * 
- * All endpoints require authentication and admin role.
- * Provides full CRUD operations for API key management.
- */
 @ApiTags('API Keys')
 @ApiBearerAuth()
 @UseGuards(AuthGuard, RolesGuard)

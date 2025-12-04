@@ -72,13 +72,7 @@ export class AuthService {
         }
     }
 
-    /**
-     * GOOGLE OAUTH LOGIN
-     * Validates or creates user from Google profile
-     * 
-     * @param googleProfile - User data from Google OAuth
-     * @returns JWT tokens and user data
-     */
+    // Valida o crea usuario desde perfil de Google OAuth
     async validateGoogleUser(googleProfile: any): Promise<{ accessToken: string; refreshToken: string; user: any }> {
         const { googleId, email, firstName, lastName } = googleProfile;
 
@@ -94,11 +88,9 @@ export class AuthService {
                 provider: 'google',
             });
         } else if (!user.googleId) {
-            // Link existing account with Google
             user = await this.userService.updateGoogleId(user.id, googleId);
         }
 
-        // Generate JWT tokens
         const payload = {
             sub: user.id,
             email: user.email,
