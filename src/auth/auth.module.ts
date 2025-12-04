@@ -8,6 +8,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { ApiKeyGuard } from './guards/api-key.guard';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { ApiKeyModule } from 'src/api-key/api-key.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   controllers: [AuthController],
@@ -16,11 +17,23 @@ import { ApiKeyModule } from 'src/api-key/api-key.module';
     AuthGuard,
     RolesGuard,
     ApiKeyGuard,
-    GoogleStrategy,
+    // GoogleStrategy is optional - only loads if Google OAuth is configured
+    {
+      provide: GoogleStrategy,
+      useFactory: (configService: ConfigService) => {
+        const googleClientId = configService.get('GOOGLE_CLIENT_ID');
+        if (googleClientId) {
+          return new GoogleStrategy(configService);
+        }
+        return null;  // Skip if not configured
+      },
+      inject: [ConfigService],
+    },
   ],
   imports: [
     forwardRef(() => UserModule),
     ApiKeyModule,
+    ConfigModule,
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,

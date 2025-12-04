@@ -98,6 +98,11 @@ export class AuthService {
             user = await this.userService.updateGoogleId(user.id, googleId);
         }
 
+        // Safety check
+        if (!user) {
+            throw new UnauthorizedException('Failed to create or find user');
+        }
+
         const payload = {
             sub: user.id,
             email: user.email,

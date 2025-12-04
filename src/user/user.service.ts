@@ -95,21 +95,21 @@ export class UserService {
    * GOOGLE OAUTH METHODS
    */
   
-  async createGoogleUser(googleData: { email: string; username: string; googleId: string; provider: string }) {
+  async createGoogleUser(googleData: { email: string; username: string; googleId: string; provider: string }): Promise<User> {
     // Get default customer role
     const customerRole = await this.roleService.findByName('customer');
     if (!customerRole) throw new BadRequestException('Customer role not found');
 
     const user = this.userRepo.create({
       ...googleData,
-      password: null,  // No password for OAuth users
+      password: undefined,  // OAuth users don't have password
       role: customerRole,
     });
 
     return this.userRepo.save(user);
   }
 
-  async updateGoogleId(userId: number, googleId: string) {
+  async updateGoogleId(userId: number, googleId: string): Promise<User> {
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
     
