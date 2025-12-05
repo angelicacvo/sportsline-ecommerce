@@ -8,8 +8,10 @@ import { JwtService } from '@nestjs/jwt';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import * as bcrypt from 'bcryptjs';
+import { randomBytes } from 'crypto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { CreateApiKeyDto } from './dto/create-api-key.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { AuthResponse } from './interfaces/auth-response.interface';
 
@@ -95,6 +97,97 @@ export class AuthService {
     // Remove password from response
     const { password, ...result } = user;
     return result;
+  }
+
+  async createApiKey(userId: string, createApiKeyDto: CreateApiKeyDto) {
+    const apiKey = `sk_${randomBytes(32).toString('hex')}`;
+    
+    const result = await firstValueFrom(
+      this.usersClient.send(
+        { cmd: 'create_api_key' },
+        {
+          key: apiKey,
+          name: createApiKeyDto.name,
+          userId,
+          expiresAt: createApiKeyDto.expiresAt || null,
+        },
+      ),
+    );
+
+    return {
+      id: result.id,
+      key: apiKey,
+      name: result.name,
+      expiresAt: result.expiresAt,
+      createdAt: result.createdAt,
+    };
+  }
+
+  async validateApiKey(apiKey: string) {
+    try {
+      const result = await firstValueFrom(
+        this.usersClient.send({ cmd: 'validate_api_key' }, { key: apiKey }),
+      );
+      return result;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async listApiKeys(userId: string) {
+    return firstValueFrom(
+      this.usersClient.send({ cmd: 'list_api_keys' }, { userId }),
+    );
+  }
+
+  async revokeApiKey(userId: string, keyId: string) {
+    return firstValueFrom(
+      this.usersClient.send({ cmd: 'revoke_api_key' }, { userId, keyId }),
+    );
+  }
+
+  async googleLogin(req: any) {
+    if (!req.user) {
+      throw new UnauthorizedException('No user from Google');
+    }
+
+    // Check if user exists
+    let user;
+    try {
+      user = await firstValueFrom(
+        this.usersClient.send({ cmd: 'find_by_email' }, { email: req.user.email }),
+      );
+    } catch (error) {
+      user = null;
+    }
+
+    // If user doesn't exist, create one
+    if (!user) {
+      user = await firstValueFrom(
+        this.usersClient.send(
+          { cmd: 'create_oauth_user' },
+          {
+            name: req.user.name,
+            email: req.user.email,
+            provider: 'google',
+          },
+        ),
+      );
+    }
+
+    // Generate JWT tokens
+    const tokens = await this.generateTokens(user);
+
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    };
   }
 
   private generateTokens(user: any): AuthResponse {

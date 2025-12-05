@@ -14,7 +14,7 @@ export class User {
   email: string;
 
   @Exclude()
-  @Column({ select: false, type: 'text' })
+  @Column({ select: false, type: 'text', nullable: true })
   password: string;
 
   @Column({ type: 'enum', enum: ['user', 'admin'], default: 'user' })

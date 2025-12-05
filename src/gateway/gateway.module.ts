@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { ClientsModule } from '@nestjs/microservices';
+import { ConfigModule } from '@nestjs/config';
 import { MICROSERVICES_CONFIG } from '../microservices.config';
 import { UsersController } from './controllers/users/users.controller';
 import { ProductsController } from './controllers/products/products.controller';
@@ -10,13 +11,20 @@ import { OrderItemsController } from './controllers/order-items/order-items.cont
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { ApiKeyGuard } from './guards/api-key.guard';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { RpcExceptionFilter } from './filters/rpc-exception.filter';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
 import { LoggingInterceptor } from './interceptors/logging.interceptor';
+import { envValidationSchema } from '../config/env.validation';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+      validationSchema: envValidationSchema,
+    }),
     ClientsModule.register([
       MICROSERVICES_CONFIG.USERS_SERVICE,
       MICROSERVICES_CONFIG.PRODUCTS_SERVICE,
@@ -41,6 +49,10 @@ import { LoggingInterceptor } from './interceptors/logging.interceptor';
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ApiKeyGuard,
     },
     {
       provide: APP_FILTER,

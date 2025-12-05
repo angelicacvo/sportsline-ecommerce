@@ -41,6 +41,9 @@ async function bootstrap() {
       3. Click "Authorize" button (top right)
       4. Enter: Bearer <your-access-token>
       5. Test protected endpoints
+      
+      **API Key Authentication:**
+      You can also use X-API-Key header for authentication on supported endpoints.
     `)
     .setVersion('1.0')
     .addBearerAuth({
@@ -51,6 +54,7 @@ async function bootstrap() {
       description: 'Enter JWT token from /auth/login',
       in: 'header',
     })
+    .addApiKey({ type: 'apiKey', name: 'x-api-key', in: 'header' }, 'api-key')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
