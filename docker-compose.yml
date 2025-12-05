@@ -38,8 +38,8 @@ services:
       ORDER_ITEMS_SERVICE_HOST: order-items-service
       JWT_SECRET: your-secret-key-change-in-production
       JWT_REFRESH_SECRET: your-refresh-secret-key-change-in-production
-      GOOGLE_CLIENT_ID: 640270787250-gjoi768v0rnmttpc82mlgenjud8r524i.apps.googleusercontent.com
-      GOOGLE_CLIENT_SECRET: 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
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-your-google-client-id}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-your-google-client-secret}
       GOOGLE_CALLBACK_URL: http://localhost:3000/auth/google/callback
     ports:
       - "3000:3000"
