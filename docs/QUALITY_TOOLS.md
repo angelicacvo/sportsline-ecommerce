@@ -37,13 +37,6 @@ docker run -d --name sonarqube -p 9000:9000 sonarqube:latest
 # Access: http://localhost:9000
 # Default credentials: admin/admin
 ```
-
-#### Option 2: SonarCloud (Cloud-based)
-1. Go to https://sonarcloud.io
-2. Sign in with GitHub
-3. Import your repository
-4. Get your organization key and token
-
 ### Configuration:
 
 Edit `sonar-project.properties` and set:
