@@ -17,6 +17,9 @@ Welcome to the Sportsline E-Commerce documentation!
 - **[Testing](TESTING.md)** - Testing procedures and verification
 - Unit tests, E2E tests, authentication testing
 
+- **[Quality Tools](QUALITY_TOOLS.md)** - Code quality and Git hooks
+- Husky pre-commit hooks, SonarQube/SonarCloud configuration
+
 ### Authentication
 
 - **[Authentication Guide](./AUTHENTICATION.md)** - Complete auth documentation
@@ -49,12 +52,13 @@ npm test
 
 ```text
 sportsline-ecommerce/
-├── README.md                    # Project overview & quick start
+├── .env                         # Environment variables
 └── docs/
     ├── README.md               # This file
     ├── GETTING_STARTED.md      # Setup guide
     ├── ARCHITECTURE.md         # System architecture
     ├── TESTING.md              # Testing procedures
+    └── QUALITY_TOOLS.md        # Husky & SonarQube
 ```
 
 ## 🔍 Find What You Need
@@ -64,6 +68,7 @@ sportsline-ecommerce/
 | Install and run the project | [Getting Started](GETTING_STARTED.md) |
 | Understand the architecture | [Architecture](ARCHITECTURE.md) |
 | Test the API | [Testing](TESTING.md) |
+| Setup code quality tools | [Quality Tools](QUALITY_TOOLS.md) |
 | Use Swagger UI | <http://localhost:3000/docs> |
 
 ## 💡 Contributing
