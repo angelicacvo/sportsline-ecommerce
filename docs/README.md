@@ -55,7 +55,6 @@ sportsline-ecommerce/
     ├── GETTING_STARTED.md      # Setup guide
     ├── ARCHITECTURE.md         # System architecture
     ├── TESTING.md              # Testing procedures
-    └── AUTHENTICATION.md       # Complete auth guide
 ```
 
 ## 🔍 Find What You Need
@@ -64,7 +63,6 @@ sportsline-ecommerce/
 |--------------|-----------|
 | Install and run the project | [Getting Started](GETTING_STARTED.md) |
 | Understand the architecture | [Architecture](ARCHITECTURE.md) |
-| Learn about authentication | [Authentication Guide](AUTHENTICATION.md) |
 | Test the API | [Testing](TESTING.md) |
 | Use Swagger UI | <http://localhost:3000/docs> |
 

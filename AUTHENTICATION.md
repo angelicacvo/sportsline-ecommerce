@@ -103,13 +103,13 @@ curl -X DELETE http://localhost:3000/auth/api-keys/KEY_ID \
 
 A test API key is available after running seed:
 ```
-sk_test_1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+Run: npm run seed
 ```
 
 Test it:
 ```bash
 curl -X GET http://localhost:3000/auth/test-api-key \
-  -H "x-api-key: sk_test_1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+  -H "x-api-key: YOUR_API_KEY_FROM_SEED"
 ```
 
 ### API Key Features

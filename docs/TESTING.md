@@ -36,7 +36,7 @@ curl -X GET http://localhost:3000/auth/test-api-key \
 **Test with Seeded Key:**
 ```bash
 curl -X GET http://localhost:3000/products \
-  -H "x-api-key: sk_test_1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+  -H "x-api-key: YOUR_API_KEY_FROM_SEED"
 ```
 
 ### 3. Google OAuth

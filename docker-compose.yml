@@ -3,9 +3,9 @@ services:
     image: postgres:16
     restart: always
     environment:
-      POSTGRES_USER: jeferson
-      POSTGRES_PASSWORD: JefersonKainToph
-      POSTGRES_DB: sportsline
+      POSTGRES_USER: ${DATABASE_USER:-jeferson}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-your-password}
+      POSTGRES_DB: ${DATABASE_NAME:-sportsline}
     ports:
       - "8326:5432"
     volumes:
@@ -28,16 +28,16 @@ services:
     environment:
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
-      DATABASE_USER: jeferson
-      DATABASE_PASSWORD: JefersonKainToph
-      DATABASE_NAME: sportsline
+      DATABASE_USER: ${DATABASE_USER:-jeferson}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-your-password}
+      DATABASE_NAME: ${DATABASE_NAME:-sportsline}
       USERS_SERVICE_HOST: users-service
       PRODUCTS_SERVICE_HOST: products-service
       ORDERS_SERVICE_HOST: orders-service
       CATEGORIES_SERVICE_HOST: categories-service
       ORDER_ITEMS_SERVICE_HOST: order-items-service
-      JWT_SECRET: your-secret-key-change-in-production
-      JWT_REFRESH_SECRET: your-refresh-secret-key-change-in-production
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your-refresh-secret-key-change-in-production}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-your-google-client-id}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-your-google-client-secret}
       GOOGLE_CALLBACK_URL: http://localhost:3000/auth/google/callback
